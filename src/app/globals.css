@@ -1,0 +1,48 @@
+:root {
+  --background: #ffffff;
+  --foreground: #101828;
+  --muted: #667085;
+  --border: #d0d5dd;
+  --primary: #0f766e;
+  --danger: #b42318;
+  --success: #027a48;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+.bg-background { background: var(--background); }
+.text-foreground { color: var(--foreground); }
+.text-muted { color: var(--muted); }
+.border-border { border-color: var(--border); }
+.bg-primary { background: var(--primary); }
+.text-primary { color: var(--primary); }
+.bg-danger { background: var(--danger); }
+.text-danger { color: var(--danger); }
+.text-success { color: var(--success); }
+.bg-muted { background: #f2f4f7; }
+.hover\:bg-muted:hover { background: #f2f4f7; }
+.hover\:text-primary:hover { color: var(--primary); }
+.hover\:text-foreground:hover { color: var(--foreground); }
+.hover\:bg-primary:hover { background: var(--primary); }
+.hover\:text-white:hover { color: #fff; }
+.hover\:opacity-90:hover { opacity: 0.9; }
+.disabled\:opacity-50:disabled { opacity: 0.5; }
+
