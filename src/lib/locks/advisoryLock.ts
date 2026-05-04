@@ -1,4 +1,4 @@
-import { supabaseServer } from '../supabase/client';
+import { supabaseServer } from '../supabase/server';
 
 export async function acquireAdvisoryLock(lockId: number, timeout = 5000) {
   const { data, error } = await supabaseServer.rpc('pg_advisory_lock', {
@@ -17,4 +17,3 @@ export async function releaseAdvisoryLock(lockId: number) {
   if (error) throw error;
   return data;
 }
-
