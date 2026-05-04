@@ -14,7 +14,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body style={{ background: 'var(--background, #fff)', color: 'var(--foreground, #000)' }}>
+      <body className="bg-background text-foreground">
         <Header />
         {children}
       </body>
