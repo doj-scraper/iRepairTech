@@ -69,7 +69,14 @@ export async function POST(req: Request) {
     }
 
     // 3. Build line items
-    const line_items = items.map((i: any) => {
+    const line_items: Array<{
+      price_data: {
+        currency: 'usd';
+        product_data: { name: string };
+        unit_amount: number;
+      };
+      quantity: number;
+    }> = items.map((i: any) => {
       const product = i.type === 'part'
         ? parts.find(p => p.id === i.id)
         : services.find(s => s.id === i.id);
@@ -84,7 +91,7 @@ export async function POST(req: Request) {
       };
     });
 
-    const total_cents = line_items.reduce(
+    const total_cents = line_items.reduce<number>(
       (sum, item) => sum + item.price_data.unit_amount * item.quantity,
       0
     );
@@ -183,4 +190,3 @@ export async function POST(req: Request) {
     );
   }
 }
-
