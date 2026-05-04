@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabaseServer } from '@/lib/supabase/client';
+import { supabaseServer } from '@/lib/supabase/server';
 import { stripe } from '@/lib/stripe/client';
 
 export async function POST(req: Request) {
@@ -40,4 +40,3 @@ export async function POST(req: Request) {
     );
   }
 }
-

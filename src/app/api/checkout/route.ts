@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabaseServer } from '@/lib/supabase/client';
+import { supabaseServer } from '@/lib/supabase/server';
 import { stripe } from '@/lib/stripe/client';
 
 async function cleanupCheckoutDraft(orderId?: string, sessionId?: string | null) {
