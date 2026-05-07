@@ -1,4 +1,168 @@
 ---
+2026-05-06 23:36 Agent: EcommerceAgent
+
+## E-Commerce Review
+
+### Strengths
+
+**Checkout API Architecture**
+- Authoritative server-side pricing (`src/app/api/checkout/route.ts`) — client cannot tamper with prices
+- Draft order pattern with `cleanupCheckoutDraft` correctly handles partial failures; Stripe session is expired and DB rows are deleted on any error after order creation
+- Zod validation via `checkoutRequestSchema.safeParse` at the API boundary (added in previous pass)
+- MOQ and stock validation before any DB writes or Stripe calls
+- Idempotent `finalize_order` RPC with `status = 'paid'` guard in `worker/src/jobs/finalizeOrder.ts` prevents double-finalization on webhook retries
+- Enqueue-only webhook handler keeps response time under Stripe's 30s timeout
+
+**Cart UX (post-DesignAgent pass)**
+- CartDrawer now connected, uses Lucide icons, Card layout, slide-in animation, and proper ARIA attributes
+- Quantity stepper (`Plus`/`Minus`) present in `CartDrawer.tsx`
+- `EmptyState` component used on both catalog and checkout pages
+
+---
+
+### Issues Found
+
+#### CRITICAL
+
+**1. Cart displays hardcoded prices — totals are completely wrong**
+File: `src/components/CartDrawer.tsx`, lines 24 and 130
+
+`CartItem` only stores `{id, type, quantity}` — no price. The drawer works around this with hardcoded constants:
+```ts
+// line 24 — total calculation
+const total = items.reduce((sum, i) => sum + i.quantity * 1000, 0);
+// line 130 — per-item price
+<PriceDisplay cents={item.quantity * 10000} size="sm" />
+```
+Every item is displayed as $100 and the total is calculated at $10/item. A B2B buyer sees a completely fabricated total before clicking Checkout. This is a conversion-killing trust issue.
+
+Fix options: (a) add `price_cents` and `name` to `CartItem` in `src/lib/schema.ts` and populate them at `addItem()` call sites in `catalog/page.tsx`, or (b) fetch live prices in the drawer (adds latency, not recommended). Option (a) is correct — the catalog already has the price at add-to-cart time.
+
+**2. `checkout.session.expired` will always throw — orders never expire cleanly**
+File: `worker/src/queue/pollQueue.ts`, line 22
+
+```ts
+await supabase.rpc('transition_order_state', { p_order_id: order.id, p_next_state: 'expired' });
+```
+`expired` was removed from the `order_status` enum in migration 009. This RPC call will throw a Postgres enum cast error on every `checkout.session.expired` event. The catch block sets `processed = false`, so the worker will retry this event forever, filling logs and blocking queue throughput for that event slot.
+
+Fix: Add `expired` back to the enum in a new migration, or map expired sessions to `failed` (which is already a valid terminal state reachable from `pending`).
+
+---
+
+#### HIGH
+
+**3. Cart item names not shown in CartDrawer**
+File: `src/components/CartDrawer.tsx`, line 88
+
+```tsx
+<p className="font-medium">Item {item.id.slice(0, 8)}</p>
+```
+B2B buyers see UUID fragments instead of product names. This is a direct consequence of `CartItem` not storing `name`. Same root cause as issue #1 — fix both together by extending `CartItem`.
+
+**4. MOQ not enforced at add-to-cart — only caught at checkout API**
+File: `src/app/shop/catalog/page.tsx`, line 97; `src/store/cart.ts`
+
+`addItem({ id: part.id, type: 'part', quantity: 1 })` always adds quantity 1, regardless of the part's `moq`. The MOQ is only validated in `route.ts` at checkout time. A buyer can fill their cart, reach the Stripe redirect step, and only then receive an error like "Minimum order quantity for iPhone 14 Screen is 10". This is a checkout abandonment trigger.
+
+Fix: Pass `moq` to `ProductCard` and use it as the initial quantity in `addItem()`. Also enforce `Math.max(moq, quantity)` in the CartDrawer's decrease button (currently `Math.max(1, item.quantity - 1)`).
+
+**5. Cart not persisted across page refreshes**
+File: `src/store/cart.ts`
+
+No `persist` middleware. Refreshing the page clears the cart. For B2B buyers who research across multiple sessions or share links with colleagues, this is a significant UX gap. Add Zustand's `persist` middleware with `localStorage` storage — it's a one-line change to the store definition.
+
+**6. Terms acceptance not collected or validated at checkout**
+File: `src/app/api/checkout/route.ts`; `src/app/checkout/page.tsx`
+
+Migration 008 added `accepted_terms`, `accepted_terms_at`, and `terms_version` to `orders`. The checkout page has no terms checkbox and the API inserts orders without these fields, leaving `accepted_terms = false` on every order. For a wholesale platform this is a legal exposure — terms acceptance is unenforceable without a timestamped record.
+
+Fix: Add a required checkbox to `checkout/page.tsx`, include `accepted_terms: true`, `accepted_terms_at: new Date().toISOString()`, and `terms_version: '1.0'` in the `orders` insert in `route.ts`. Reject the request if `accepted_terms` is not `true`.
+
+**7. Raw error messages exposed to client**
+File: `src/app/api/checkout/route.ts`, line at the catch block
+
+```ts
+return NextResponse.json({ error: String(error) }, { status: 400 });
+```
+`String(error)` on a Supabase or Stripe error includes internal details: table names, constraint names, Stripe API error codes. Map known error types to user-safe messages and log the full error server-side only.
+
+---
+
+#### MEDIUM
+
+**8. `charge.refunded` metadata path may be wrong**
+File: `worker/src/queue/pollQueue.ts`, lines 33–34
+
+```ts
+const charge = event.payload?.data?.object;
+const orderId = charge?.metadata?.order_id;
+```
+The checkout route sets `payment_intent_data.metadata.order_id`, which attaches metadata to the PaymentIntent — not the Charge. Stripe does not automatically copy PaymentIntent metadata to the Charge object. `charge.metadata.order_id` will be `undefined` for most refunds, causing the refund handler to silently no-op (the `if (orderId)` guard swallows it). Verify against actual Stripe event payloads; the correct path is likely `charge.payment_intent` → look up the PI → read its metadata, or set `metadata` directly on the Stripe session's `payment_intent_data` and also on the session itself.
+
+**9. No authentication required for checkout**
+File: `src/app/api/checkout/route.ts`
+
+The checkout API accepts any request with a valid email. `user_id` on orders is nullable (guest checkout), but for a B2B wholesale platform with MOQ requirements and wholesale pricing, anonymous checkout is a risk. At minimum, prompt users to log in before checkout and associate the order with their `profiles` row. This also enables order history on the dashboard.
+
+**10. Worker has no retry limit — failing events loop forever**
+File: `worker/src/queue/pollQueue.ts`, catch block
+
+When an event fails, the catch block sets `processed = false` (it was already false) and logs the error. There is no `retry_count` column or max-retry guard. A permanently unprocessable event (e.g., the `expired` enum bug above) will be fetched, attempted, and failed on every 2-second poll cycle indefinitely. Add a `retry_count int default 0` column to `stripe_events` and skip events that exceed a threshold (e.g., 5 retries), or set `processed = true` with an error flag.
+
+**11. No `/success` page implementation confirmed**
+File: `src/app/api/checkout/route.ts`, line building `success_url`
+
+```ts
+success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/success?session_id={CHECKOUT_SESSION_ID}`
+```
+The success URL passes `session_id` as a query param, which is the correct pattern for verifying payment on the success page. However, there is no evidence a `/success` page exists that reads this param, verifies the session with Stripe, and clears the cart. If the page is missing or doesn't verify the session, buyers land on a broken page after payment. Confirm the page exists and calls `stripe.checkout.sessions.retrieve(session_id)` to display confirmed order details.
+
+**12. No fulfillment workflow beyond `paid`**
+The state machine defines `paid → awaiting_device → device_received → in_repair → qa → shipped → completed` but no code transitions orders past `paid`. There is no admin UI, no API endpoint, and no worker job for fulfillment progression. Orders accumulate at `paid` indefinitely. This is acceptable for MVP but must be tracked as a pre-launch gap for any real order volume.
+
+---
+
+#### LOW
+
+**13. Catalog page is a client component — no SSR for SEO**
+File: `src/app/shop/catalog/page.tsx`, line 1: `'use client'`
+
+The catalog fetches data client-side via `useEffect`. Search engines see an empty product grid. For a wholesale parts catalog, organic search for terms like "wholesale iPhone 14 screen" is a meaningful acquisition channel. Convert to a Server Component with `supabase.from('inventory_parts').select(...)` at render time, or use `generateStaticParams` with ISR.
+
+**14. No individual product pages**
+There is no `/shop/catalog/[id]` route. Buyers cannot bookmark or share a specific part. B2B buyers frequently share product links internally before approving a purchase. This also blocks structured data (JSON-LD) for product SEO.
+
+**15. No order confirmation email**
+After `finalize_order` succeeds, no email is sent to the customer. Stripe sends a receipt if `customer_email` is set on the session (it is), but that receipt is generic. A branded order confirmation with line items, order ID, and next steps is standard for B2B.
+
+**16. `updateQuantity` in CartDrawer doesn't enforce MOQ lower bound**
+File: `src/components/CartDrawer.tsx`, line 107
+
+```ts
+onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
+```
+The floor is 1, not the item's MOQ. A buyer who adds 10 units (meeting MOQ of 10) can decrement to 1 in the drawer and proceed to checkout, where the API will reject them. The drawer needs access to each item's MOQ to enforce the correct minimum.
+
+---
+
+### Summary of Pre-Launch Blockers
+
+| # | Issue | File | Severity |
+|---|-------|------|----------|
+| 1 | Cart shows hardcoded prices ($100/item) | `CartDrawer.tsx:24,130` | CRITICAL |
+| 2 | `expired` enum missing — worker loops forever on session expiry | `pollQueue.ts:22` | CRITICAL |
+| 3 | Cart item names show UUID fragments | `CartDrawer.tsx:88` | HIGH |
+| 4 | MOQ not enforced at add-to-cart | `catalog/page.tsx:97` | HIGH |
+| 5 | Cart not persisted | `cart.ts` | HIGH |
+| 6 | Terms acceptance not collected | `checkout/page.tsx`, `route.ts` | HIGH |
+| 7 | Raw errors exposed to client | `route.ts` catch block | HIGH |
+| 8 | `charge.refunded` metadata path likely wrong | `pollQueue.ts:33` | MEDIUM |
+
+Issues 1 and 2 are the most urgent: issue 1 means every buyer sees wrong prices in their cart, and issue 2 means the worker enters an infinite error loop on any expired Stripe session.
+---
+CHECKPOINT: Commit e7d351e pushed to origin/Main — 2026-05-06 22:35
+---
 2026-05-06 22:30 Agent: TODO2Reviewer
 
 REVIEW REPORT
