@@ -1,7 +1,8 @@
-import { supabaseServer } from '../supabase/server';
+import { createClient } from '../supabase/server';
 
 export async function acquireAdvisoryLock(lockId: number, timeout = 5000) {
-  const { data, error } = await supabaseServer.rpc('pg_advisory_lock', {
+  const supabase = createClient();
+  const { data, error } = await supabase.rpc('pg_advisory_lock', {
     lockid: lockId
   });
   
@@ -10,7 +11,8 @@ export async function acquireAdvisoryLock(lockId: number, timeout = 5000) {
 }
 
 export async function releaseAdvisoryLock(lockId: number) {
-  const { data, error } = await supabaseServer.rpc('pg_advisory_unlock', {
+  const supabase = createClient();
+  const { data, error } = await supabase.rpc('pg_advisory_unlock', {
     lockid: lockId
   });
   

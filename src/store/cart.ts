@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { CartItem } from '@/lib/schema';
 
 interface CartStore {
-  items: CartItem[];
+  readonly items: ReadonlyArray<CartItem>;
   addItem: (item: CartItem) => void;
   removeItem: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;

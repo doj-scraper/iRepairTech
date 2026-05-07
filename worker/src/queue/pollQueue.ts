@@ -21,20 +21,22 @@ export async function processQueue() {
         const session = event.payload?.data?.object;
 
         if (session?.id) {
-          await supabase
+          const { data: order } = await supabase
             .from('orders')
-            .update({ status: 'expired' })
-            .eq('stripe_session_id', session.id);
+            .select('id')
+            .eq('stripe_session_id', session.id)
+            .single();
+
+          if (order) {
+            await supabase.rpc('transition_order_state', { p_order_id: order.id, p_next_state: 'expired' });
+          }
         }
       } else if (event.type === 'charge.refunded') {
         const charge = event.payload?.data?.object;
         const orderId = charge?.metadata?.order_id;
 
         if (orderId) {
-          await supabase
-            .from('orders')
-            .update({ status: 'refunded' })
-            .eq('id', orderId);
+          await supabase.rpc('transition_order_state', { p_order_id: orderId, p_next_state: 'refunded' });
         }
       }
 

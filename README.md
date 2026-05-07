@@ -1,52 +1,27 @@
-# iRepair v2.5 — Production System
+# iRepair v2.5 — Wholesale Cell Phone Repair Parts
 
-## Architecture Overview
+Production-grade e-commerce platform for wholesale iPhone repair parts. Built with Next.js 14, Supabase, Stripe, and Tailwind CSS v4.
 
-```
-WEB (Next.js)
-  ↓
-EDGE (Supabase Edge Functions / Webhooks ingest)
-  ↓
-WORKER (async reconciliation engine)
-  ↓
-DB (migrations + projections + constraints)
-  ↓
-SHARED (types, schemas, domain logic)
-```
+## Features
 
-## Project Structure
+- 🎨 Modern design system with bay-blue + teal palette
+- 🔐 Supabase authentication and RLS
+- 💳 Stripe checkout integration
+- 📦 Real-time inventory management
+- 🔄 Async webhook processing with worker
+- 📱 Fully responsive design
+- ♿ WCAG AA compliant
+- 🚀 Optimized for B2B wholesale
 
-```
-/
-├── src/                          # Next.js Application (UI + BFF layer)
-│   ├── app/                      # App Router
-│   ├── domain/                   # Business logic (checkout, inventory, orders)
-│   ├── lib/                      # Utilities (supabase, stripe, locks, cache)
-│   ├── components/               # React components
-│   └── store/                    # Zustand stores
-│
-├── supabase/                     # Database + Edge Functions
-│   ├── functions/                # Edge functions
-│   └── migrations/               # SQL migrations
-│
-├── worker/                       # Async reconciliation engine
-│   ├── src/
-│   │   ├── jobs/                 # Job handlers
-│   │   ├── queue/                # Queue processor
-│   │   ├── locks/                # Advisory locks
-│   │   └── db/                   # Database client
-│
-├── sql/                          # Pure SQL (migration source of truth)
-├── packages/                     # Shared domain logic
-│   ├── domain/                   # Zod schemas
-│   ├── types/                    # TypeScript types
-│   └── validators/               # Validation logic
-│
-├── tests/                        # E2E + integration tests
-├── .github/workflows/            # CI/CD pipeline
-├── docker-compose.yml            # Local infrastructure
-└── README.md
-```
+## Tech Stack
+
+- **Frontend:** Next.js 14 (App Router), React 18, TypeScript
+- **Styling:** Tailwind CSS v4, shadcn/ui components
+- **Backend:** Supabase (PostgreSQL + Auth + RLS)
+- **Payments:** Stripe Checkout + Webhooks
+- **State:** Zustand
+- **Forms:** React Hook Form + Zod
+- **Icons:** Lucide React
 
 ## Getting Started
 
@@ -54,7 +29,8 @@ SHARED (types, schemas, domain logic)
 
 - Node.js 18+
 - pnpm
-- Docker (optional, for local Postgres)
+- Supabase account
+- Stripe account
 
 ### Installation
 
@@ -62,105 +38,110 @@ SHARED (types, schemas, domain logic)
 pnpm install
 ```
 
-### Development
+### Environment Variables
 
-Run both web and worker:
+Create `.env.local`:
 
-```bash
-pnpm dev
-```
-
-Or run individually:
-
-```bash
-pnpm dev:web    # Next.js on http://localhost:3000
-pnpm dev:worker # Worker process
-```
-
-### Docker Setup
-
-```bash
-docker-compose up
-```
-
-## Critical Flows
-
-### 1. Checkout Flow
-
-```
-Next.js API
-  → validate cart (Zod)
-  → reserve inventory (DB + lock)
-  → create order
-  → create Stripe session
-  → return URL
-```
-
-### 2. Stripe Webhook Flow
-
-```
-Stripe webhook
-  → edge function ingest
-  → enqueue event
-  → worker processes
-      → finalize order
-      → commit inventory
-      → release reservations if needed
-```
-
-### 3. Failure Recovery
-
-```
-Worker crash
-  → queue remains
-  → retry on restart
-```
-
-## Environment Variables
-
-### `.env.local` (Next.js)
-
-```
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
-SUPABASE_SERVICE_ROLE_KEY=
-STRIPE_SECRET_KEY=
-STRIPE_WEBHOOK_SECRET=
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+STRIPE_SECRET_KEY=your_stripe_secret
+STRIPE_WEBHOOK_SECRET=your_webhook_secret
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ```
 
-### `.env` (Worker)
+### Database Setup
+
+Run migrations:
+
+```bash
+# Using Supabase CLI
+supabase db push
+
+# Or manually run migrations in supabase/migrations/
+```
+
+### Development
+
+```bash
+# Start Next.js dev server
+pnpm dev
+
+# Start worker (separate terminal)
+cd worker && pnpm dev
+```
+
+Visit [http://localhost:3000](http://localhost:3000)
+
+### Production Build
+
+```bash
+pnpm build
+pnpm start
+```
+
+## Project Structure
 
 ```
-SUPABASE_URL=
-SUPABASE_SERVICE_ROLE_KEY=
+/
+├── src/
+│   ├── app/              # Next.js App Router pages
+│   ├── components/       # React components
+│   ├── lib/              # Utilities (supabase, stripe, etc.)
+│   └── store/            # Zustand stores
+├── supabase/
+│   ├── migrations/       # Database migrations
+│   └── functions/        # Edge functions (stubs)
+├── worker/               # Async webhook processor
+└── public/               # Static assets
 ```
 
-## Key Design Decisions
+## Deployment
 
-1. **Webhook Enqueue Only** - API doesn't process webhooks, just stores them
-2. **Worker Polling** - Simple, reliable, no message queue needed initially
-3. **Idempotency Guards** - Worker checks order status before finalizing
-4. **Monorepo** - Shared types and domain logic across services
-5. **Event Sourcing Ready** - Can migrate to event log without major refactor
-6. **Advisory Locks** - Prevents race conditions on inventory
-7. **Derived Projections** - UI only reads from projections, not raw tables
+### Vercel (Recommended)
 
-## Production Readiness
+```bash
+vercel deploy
+```
 
-✅ Handles Stripe retries via queue  
-✅ Handles duplicate webhooks via idempotent ingestion  
-✅ Handles inventory race conditions via advisory locks  
-✅ Handles partial failures via worker retry  
-✅ Handles UI inconsistency via derived projections  
+Configure environment variables in Vercel dashboard.
 
-## Next Steps
+### Manual Deployment
 
-- [ ] Add inventory reservation logic
-- [ ] Implement order fulfillment workflow
-- [ ] Add authentication (Supabase Auth)
-- [ ] Create product catalog UI
-- [ ] Add error handling and logging
-- [ ] Set up CI/CD pipeline
-- [ ] Add E2E tests
-- [ ] Deploy to production
+1. Build the application: `pnpm build`
+2. Start the server: `pnpm start`
+3. Deploy worker separately
+4. Configure Stripe webhook endpoint
+
+## Key Features
+
+### Checkout Flow
+
+1. User adds items to cart
+2. Validates inventory and MOQ
+3. Creates Stripe checkout session
+4. Redirects to Stripe
+5. Webhook processes payment
+6. Worker finalizes order
+
+### State Machine
+
+Orders follow strict state transitions enforced at database level:
+- `pending` → `paid` → `completed`
+- `pending` → `expired` / `failed`
+
+### Security
+
+- Row-level security (RLS) on all tables
+- Service role for backend operations
+- Webhook signature verification
+- Advisory locks for inventory
+
+## License
+
+Proprietary - iRepair Technologies
+
+## Support
+
+Contact: sales@irepairtech.com

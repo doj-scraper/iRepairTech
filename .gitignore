@@ -15,6 +15,10 @@ worker/dist/
 .env.development.local
 .env.test.local
 .env.production.local
+envvari.txt
+envvaris.txt
+*.pem
+*.key
 
 # Logs
 *.log
@@ -30,3 +34,13 @@ Thumbs.db
 # Misc
 .vercel/
 coverage/
+*.odt
+tsconfig.tsbuildinfo
+
+# Agent files
+.agents/
+
+# Documentation (except README and ARCHITECTURE)
+*.md
+!README.md
+!ARCHITECTURE.md

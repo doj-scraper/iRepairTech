@@ -1,0 +1,217 @@
+[[irepair]]
+
+Schemas present
+public (your app domain data; RLS enabled on your tables)
+auth (Supabase Auth system tables)
+storage (buckets/objects system tables)
+realtime (realtime system tables)
+graphql, graphql_public, vault, plus extensions, pgbouncer (system-related)
+RLS policies (public schema)
+RLS policies exist for these public tables (and actions):
+
+public.inventory_parts: SELECT for public, and SELECT for authenticated
+public.repair_services: SELECT for public, and SELECT for authenticated
+public.profiles:
+SELECT for public policy (definition shown as auth.uid() = id)
+UPDATE for authenticated (id = auth.uid() and check id = auth.uid())
+public.orders:
+SELECT for public (auth.uid() = user_id)
+INSERT / UPDATE / DELETE / SELECT policies for authenticated scoped by user_id = auth.uid()
+public.order_items_parts: SELECT for public via order_id IN (select orders...); SELECT for authenticated via EXISTS with orders.user_id = auth.uid()
+public.order_items_services: same pattern as parts
+public.stripe_events: policy for service_role with ALL (write-side webhook/events)
+(Also: is_active = true appears for the policy definitions returned.)
+
+Your public tables (app tables)
+public.inventory_parts (RLS enabled)
+PK: id
+Columns: id, sku, name, description?, image_url?, price_cents, stock_count, moq, is_active, created_at
+FK: order_items_parts.part_id -> inventory_parts.id
+public.repair_services (RLS enabled)
+PK: id
+Columns: id, sku, name, description?, image_url?, price_cents, estimated_hours?, is_active, created_at
+FK: order_items_services.service_id -> repair_services.id
+public.profiles (RLS enabled)
+PK: id
+Columns: id, email?, created_at
+FK: profiles.id -> auth.users.id
+FK: orders.user_id -> profiles.id
+public.orders (RLS enabled)
+PK: id
+Columns:
+id, user_id?, stripe_session_id (unique), total_cents, status (order_status enum), created_at, updated_at, accepted_terms, accepted_terms_at?, terms_version?
+FKs:
+order_items_parts.order_id -> orders.id
+order_items_services.order_id -> orders.id
+order_state_history.order_id -> orders.id
+orders.user_id -> profiles.id
+public.order_items_parts (RLS enabled)
+PK: id
+Columns: id, order_id?, part_id?, quantity, price_cents
+FKs:
+order_id -> orders.id
+part_id -> inventory_parts.id
+public.order_items_services (RLS enabled)
+PK: id
+Columns: id, order_id?, service_id?, price_cents
+FKs:
+order_id -> orders.id
+service_id -> repair_services.id
+public.stripe_events (RLS enabled)
+PK: id
+Columns: id, event_id (unique), type, payload, processed?, created_at
+public.order_state_transitions (RLS enabled)
+PK: (from_state, to_state)
+Columns: from_state (order_status enum), to_state (order_status enum)
+public.order_state_history (RLS enabled)
+PK: id
+Columns: id, order_id?, from_state (enum), to_state (enum), changed_at, metadata?
+FK: order_id -> orders.id
+Hidden/system tables also present (examples)
+You also have the standard Supabase system tables with lots of columns, e.g.:
+
+auth.* tables (users, sessions, refresh_tokens, MFA, OAuth/SSO, etc.)
+storage.* tables (buckets, objects, multipart uploads, vector/analyics buckets, etc.)
+realtime.* tables (realtime.messages, etc.)
+vault.secrets (RLS disabled)*
+## Indexes per table (all schemas)
+
+### `public`
+
+- `public.inventory_parts`
+    - `PRIMARY` (`id`)
+    - `UNIQUE` (`sku`)
+    - `INDEX` `inventory_parts_is_active_idx` (`is_active`)
+- `public.repair_services`
+    - `PRIMARY` (`id`)
+    - `UNIQUE` (`sku`)
+    - `INDEX` `repair_services_is_active_idx` (`is_active`)
+- `public.profiles`
+    - `PRIMARY` (`id`)
+    - `INDEX` `profiles_email_idx` (`email`)
+- `public.orders`
+    - `PRIMARY` (`id`)
+    - `INDEX` `idx_orders_user` (`user_id`)
+    - `INDEX` `idx_orders_status` (`status`)
+    - `INDEX` `idx_orders_stripe_session` (`stripe_session_id`)
+    - `UNIQUE` `orders_stripe_session_id_key` (`stripe_session_id`)
+- `public.order_items_parts`
+    - `PRIMARY` (`id`)
+    - `INDEX` `idx_order_items_parts_order` (`order_id`)
+- `public.order_items_services`
+    - `PRIMARY` (`id`)
+    - `INDEX` `idx_order_items_services_order` (`order_id`)
+- `public.stripe_events`
+    - `PRIMARY` (`id`)
+    - `UNIQUE` `stripe_events_event_id_key` (`event_id`)
+    - `INDEX` `idx_stripe_events_event_id` (`event_id`)
+    - `INDEX` `idx_stripe_events_processed` (`processed`)
+- `public.order_state_transitions`
+    - `PRIMARY` (`from_state`, `to_state`)
+- `public.order_state_history`
+    - `PRIMARY` (`id`)
+
+### `auth`
+
+- `auth.users`
+    - `PRIMARY` (`id`)
+    - `INDEX` `idx_users_email` (`email`)
+    - `INDEX` `idx_users_last_sign_in_at_desc` (`last_sign_in_at`)
+    - `INDEX` `idx_users_created_at_desc` (`created_at`)
+    - `INDEX` `users_instance_id_idx` (`instance_id`)
+    - `INDEX` `users_instance_id_email_idx` (`instance_id`, `email`)
+    - `INDEX` `users_is_anonymous_idx` (`is_anonymous`)
+    - `UNIQUE` `confirmation_token_idx` (`confirmation_token`)
+    - `UNIQUE` `email_change_token_current_idx` (`email_change_token_current`)
+    - `UNIQUE` `email_change_token_new_idx` (`email_change_token_new`)
+    - `UNIQUE` `reauthentication_token_idx` (`reauthentication_token`)
+    - `UNIQUE` `recovery_token_idx` (`recovery_token`)
+    - `UNIQUE` `users_email_partial_key` (`email`)
+    - `UNIQUE` `users_phone_key` (`phone`)
+- `auth.sessions`
+    - `PRIMARY` (`id`)
+    - `INDEX` `sessions_user_id_idx` (`user_id`)
+    - `INDEX` `user_id_created_at_idx` (`user_id`, `created_at`)
+    - `INDEX` `sessions_oauth_client_id_idx` (`oauth_client_id`)
+    - `INDEX` `sessions_not_after_idx` (`not_after`)
+    - `INDEX` `sessions_user_id_idx` (`user_id`)
+    - `INDEX` `sessions_oauth_client_id_idx` (`oauth_client_id`)
+- `auth.refresh_tokens`
+    - `PRIMARY` (`id`)
+    - `UNIQUE` (`token`)
+    - `INDEX` `refresh_tokens_instance_id_idx` (`instance_id`)
+    - `INDEX` `refresh_tokens_instance_id_user_id_idx` (`instance_id`, `user_id`)
+    - `INDEX` `refresh_tokens_parent_idx` (`parent`)
+    - `INDEX` `refresh_tokens_session_id_revoked_idx` (`session_id`, `revoked`)
+    - `INDEX` `refresh_tokens_updated_at_idx` (`updated_at`)
+- plus many other auth tables (custom OAuth, MFA, SSO, SAML, etc.)—your project has a standard Supabase Auth indexing set; I can narrow these to only the tables you care about if you want.
+
+### `storage`
+
+- `storage.buckets`
+    - `PRIMARY` (`id`)
+    - `UNIQUE` (`name`)
+- `storage.objects`
+    - `PRIMARY` (`id`)
+    - `UNIQUE` `bucketid_objname` (`bucket_id`, `name`)
+    - `INDEX` `objects_bucket_id_name` (`bucket_id`, `name`)
+    - `INDEX` `objects_bucket_id_name_lower` (`bucket_id`) _(as returned by the tool)_
+    - `INDEX` `name_prefix_search` (`name`)
+- `storage.migrations`, `storage.s3_multipart_uploads`, `storage.s3_multipart_uploads_parts`, `storage.vector_indexes`, etc.
+    - each has the expected primary/unique/index definitions (e.g. `vector_indexes_name_bucket_id_idx`, multipart upload listing indexes, etc.)
+
+### `realtime`
+
+- `realtime.messages`
+    - `PRIMARY` (`id`, `inserted_at`)
+    - `INDEX` `messages_inserted_at_topic_index` (`inserted_at`, `topic`)
+- `realtime.subscription`
+    - `PRIMARY` (`id`)
+    - `UNIQUE` `subscription_subscription_id_entity_filters_action_filter_key` (`subscription_id`, `entity`, `filters`, `action_filter`)
+    - `INDEX` `ix_realtime_subscription_entity` (`entity`)
+
+### `vault`
+
+- `vault.secrets`
+    - `PRIMARY` (`id`)
+    - `UNIQUE` `secrets_name_idx` (`name`)
+
+---## `public` FK graph (relationship map)
+
+### Core relationships
+
+- `public.profiles.id` → `auth.users.id`  
+    (via `profiles_id_fkey`)
+    
+- `public.orders.user_id` → `public.profiles.id`  
+    (via `orders_user_id_fkey`)
+    
+
+### Order line items → parent order
+
+- `public.order_items_parts.order_id` → `public.orders.id`  
+    (via `order_items_parts_order_id_fkey`)
+    
+- `public.order_items_services.order_id` → `public.orders.id`  
+    (via `order_items_services_order_id_fkey`)
+    
+
+### Order line items → referenced catalog items
+
+- `public.order_items_parts.part_id` → `public.inventory_parts.id`  
+    (via `order_items_parts_part_id_fkey`)
+    
+- `public.order_items_services.service_id` → `public.repair_services.id`  
+    (via `order_items_services_service_id_fkey`)
+    
+
+### Order state history
+
+- `public.order_state_history.order_id` → `public.orders.id`  
+    (via `order_state_history_order_id_fkey`)
+
+### No FK links
+
+- `public.inventory_parts` and `public.repair_services` don’t have FKs pointing outward (they’re referenced by order item tables).
+- `public.order_items_parts` / `public.order_items_services` don’t reference each other (each is separate).
+- `public.order_state_transitions` has a composite PK but no FK constraints (it’s a transition matrix).

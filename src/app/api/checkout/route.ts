@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
-import { supabaseServer } from '@/lib/supabase/server';
+import { createClient } from '@/lib/supabase/server';
 import { stripe } from '@/lib/stripe/client';
+import { checkoutRequestSchema } from '@/types/dtos/checkout.dto';
+import type { CheckoutItem } from '@/types/dtos/checkout.dto';
 
 async function cleanupCheckoutDraft(orderId?: string, sessionId?: string | null) {
   if (sessionId) {
@@ -15,9 +17,10 @@ async function cleanupCheckoutDraft(orderId?: string, sessionId?: string | null)
     return;
   }
 
-  await supabaseServer.from('order_items_parts').delete().eq('order_id', orderId);
-  await supabaseServer.from('order_items_services').delete().eq('order_id', orderId);
-  await supabaseServer.from('orders').delete().eq('id', orderId);
+  const supabase = createClient();
+  await supabase.from('order_items_parts').delete().eq('order_id', orderId);
+  await supabase.from('order_items_services').delete().eq('order_id', orderId);
+  await supabase.from('orders').delete().eq('id', orderId);
 }
 
 export async function POST(req: Request) {
@@ -25,39 +28,44 @@ export async function POST(req: Request) {
   let createdSessionId: string | null = null;
 
   try {
-    const { items, email } = await req.json();
+    const body = await req.json();
+    const parsed = checkoutRequestSchema.safeParse(body);
 
-    if (!items || !email) {
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: 'Missing items or email' },
+        { error: 'Invalid request', details: parsed.error.flatten().fieldErrors },
         { status: 400 }
       );
     }
 
+    const { items, email } = parsed.data;
+
+    const supabase = createClient();
+
     // 1. Fetch authoritative prices
-    const partIds = items.filter((i: any) => i.type === 'part').map((i: any) => i.id);
-    const serviceIds = items.filter((i: any) => i.type === 'service').map((i: any) => i.id);
+    const partIds = items.filter((i: CheckoutItem) => i.type === 'part').map((i: CheckoutItem) => i.id);
+    const serviceIds = items.filter((i: CheckoutItem) => i.type === 'service').map((i: CheckoutItem) => i.id);
 
     const [partsRes, servicesRes] = await Promise.all([
       partIds.length > 0
-        ? supabaseServer
+        ? supabase
             .from('inventory_parts')
             .select('id, name, price_cents, stock_count, moq')
             .in('id', partIds)
-        : Promise.resolve({ data: [] }),
+        : Promise.resolve({ data: [] as Array<{ id: string; name: string; price_cents: number; stock_count: number; moq: number }> }),
       serviceIds.length > 0
-        ? supabaseServer
+        ? supabase
             .from('repair_services')
             .select('id, name, price_cents')
             .in('id', serviceIds)
-        : Promise.resolve({ data: [] }),
+        : Promise.resolve({ data: [] as Array<{ id: string; name: string; price_cents: number }> }),
     ]);
 
-    const parts = partsRes.data || [];
-    const services = servicesRes.data || [];
+    const parts = partsRes.data ?? [];
+    const services = servicesRes.data ?? [];
 
     // 2. Validate stock + MOQ for parts
-    for (const item of items.filter((i: any) => i.type === 'part')) {
+    for (const item of items.filter((i: CheckoutItem) => i.type === 'part')) {
       const product = parts.find(p => p.id === item.id);
       if (!product) throw new Error(`Part ${item.id} not found`);
       if (product.stock_count < item.quantity) {
@@ -76,7 +84,7 @@ export async function POST(req: Request) {
         unit_amount: number;
       };
       quantity: number;
-    }> = items.map((i: any) => {
+    }> = items.map((i: CheckoutItem) => {
       const product = i.type === 'part'
         ? parts.find(p => p.id === i.id)
         : services.find(s => s.id === i.id);
@@ -96,9 +104,8 @@ export async function POST(req: Request) {
       0
     );
 
-    // 4. Create a draft order before the Stripe session so the webhook can
-    // reconcile against a durable row in the schema that requires session id.
-    const { data: order, error: orderError } = await supabaseServer
+    // 4. Create a draft order
+    const { data: order, error: orderError } = await supabase
       .from('orders')
       .insert({
         stripe_session_id: `draft_${crypto.randomUUID()}`,
@@ -113,8 +120,8 @@ export async function POST(req: Request) {
 
     // 5. Create order items
     const partItems = items
-      .filter((i: any) => i.type === 'part')
-      .map((i: any) => {
+      .filter((i: CheckoutItem) => i.type === 'part')
+      .map((i: CheckoutItem) => {
         const product = parts.find(p => p.id === i.id);
         if (!product) throw new Error(`Part ${i.id} not found`);
         return {
@@ -126,8 +133,8 @@ export async function POST(req: Request) {
       });
 
     const serviceItems = items
-      .filter((i: any) => i.type === 'service')
-      .map((i: any) => {
+      .filter((i: CheckoutItem) => i.type === 'service')
+      .map((i: CheckoutItem) => {
         const product = services.find(s => s.id === i.id);
         if (!product) throw new Error(`Service ${i.id} not found`);
         return {
@@ -138,14 +145,14 @@ export async function POST(req: Request) {
       });
 
     if (partItems.length > 0) {
-      const { error: itemsError } = await supabaseServer
+      const { error: itemsError } = await supabase
         .from('order_items_parts')
         .insert(partItems);
       if (itemsError) throw itemsError;
     }
 
     if (serviceItems.length > 0) {
-      const { error: itemsError } = await supabaseServer
+      const { error: itemsError } = await supabase
         .from('order_items_services')
         .insert(serviceItems);
       if (itemsError) throw itemsError;
@@ -171,7 +178,7 @@ export async function POST(req: Request) {
     createdSessionId = session.id;
 
     // 7. Attach session to order
-    const { error: updateError } = await supabaseServer
+    const { error: updateError } = await supabase
       .from('orders')
       .update({ stripe_session_id: session.id })
       .eq('id', order.id);

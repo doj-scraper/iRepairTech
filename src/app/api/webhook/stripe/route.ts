@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabaseServer } from '@/lib/supabase/server';
+import { createClient } from '@/lib/supabase/server';
 import { stripe } from '@/lib/stripe/client';
 
 export async function POST(req: Request) {
@@ -14,8 +14,9 @@ export async function POST(req: Request) {
       process.env.STRIPE_WEBHOOK_SECRET!
     );
 
+    const supabase = createClient();
     // Log event once; the worker owns processing.
-    const { error: logError } = await supabaseServer
+    const { error: logError } = await supabase
       .from('stripe_events')
       .upsert({
         event_id: event.id,

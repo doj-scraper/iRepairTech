@@ -1,6 +1,17 @@
 import { supabase } from '../db/client';
 
-export async function finalizeOrder(event: any) {
+interface StripeEventRecord {
+  payload: {
+    data: {
+      object: {
+        id: string;
+        metadata?: { order_id?: string };
+      };
+    };
+  };
+}
+
+export async function finalizeOrder(event: StripeEventRecord) {
   const session = event.payload?.data?.object;
   const orderId = session?.metadata?.order_id;
 

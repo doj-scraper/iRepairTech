@@ -1,11 +1,12 @@
 import type { UIState, UIIntent, Severity } from './types';
+import type { InventoryPart, Order, RepairService } from '@/lib/database.types';
 
 /**
  * Central rule engine:
  * DB state → UI semantics
  */
 
-export function mapInventoryPart(part: any) {
+export function mapInventoryPart(part: InventoryPart) {
   const lowStock = part.stock_count <= 3;
   const outOfStock = part.stock_count === 0;
 
@@ -31,7 +32,7 @@ export function mapInventoryPart(part: any) {
   };
 }
 
-export function mapOrder(order: any) {
+export function mapOrder(order: Order) {
   let ui_state: UIState = 'muted';
 
   switch (order.status) {
@@ -39,14 +40,12 @@ export function mapOrder(order: any) {
       ui_state = 'warning';
       break;
     case 'paid':
+    case 'fulfilled':
       ui_state = 'success';
       break;
-    case 'failed':
-    case 'cancelled':
+    case 'refunded':
+    case 'expired':
       ui_state = 'danger';
-      break;
-    case 'shipped':
-      ui_state = 'success';
       break;
     default:
       ui_state = 'muted';
@@ -58,7 +57,7 @@ export function mapOrder(order: any) {
   };
 }
 
-export function mapRepairService(service: any) {
+export function mapRepairService(service: RepairService) {
   return {
     ...service,
     ui_state: 'neutral' as UIState,

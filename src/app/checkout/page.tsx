@@ -1,8 +1,16 @@
+
 'use client';
 
 import { useEffect, useState } from 'react';
 import { useCart } from '@/store/cart';
 import { supabaseClient } from '@/lib/supabase/client';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { PriceDisplay } from '@/components/ui/price-display';
+import { EmptyState } from '@/components/ui/empty-state';
+import Link from 'next/link';
 
 type QuotedItem = {
   id: string;
@@ -60,7 +68,7 @@ export default function CheckoutPage() {
 
         const nextQuotedItems = items.map((item) => {
           if (item.type === 'part') {
-            const part = partsRes.data?.find((p: any) => p.id === item.id);
+            const part = partsRes.data?.find((p) => p.id === item.id);
             return {
               id: item.id,
               type: item.type,
@@ -70,7 +78,7 @@ export default function CheckoutPage() {
             };
           }
 
-          const service = servicesRes.data?.find((s: any) => s.id === item.id);
+          const service = servicesRes.data?.find((s) => s.id === item.id);
           return {
             id: item.id,
             type: item.type,
@@ -125,70 +133,107 @@ export default function CheckoutPage() {
 
       clear();
       window.location.href = data.url;
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
       setLoading(false);
     }
   };
 
   if (items.length === 0) {
     return (
-      <div className="min-h-screen bg-background p-8">
-        <h1 className="text-3xl font-bold mb-8">Checkout</h1>
-        <p className="text-muted">Your cart is empty</p>
+      <div className="min-h-screen bg-background">
+        <div className="container py-8">
+          <h1 className="mb-8 text-3xl font-display font-bold">Checkout</h1>
+          <EmptyState
+            title="Your cart is empty"
+            description="Add some items to your cart to continue with checkout."
+            action={
+              <Link href="/shop/catalog">
+                <Button>Browse Catalog</Button>
+              </Link>
+            }
+          />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background p-8">
-      <h1 className="text-3xl font-bold mb-8">Checkout</h1>
+    <div className="min-h-screen bg-background">
+      <div className="container py-8">
+        <h1 className="mb-8 text-3xl font-display font-bold">Checkout</h1>
 
-      <div className="max-w-2xl">
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
-          <div className="border rounded-lg p-4">
-            {quoteLoading ? (
-              <p className="text-muted">Calculating prices...</p>
-            ) : (
-              quotedItems.map((item) => (
-                <div key={item.id} className="flex justify-between mb-2">
-                  <span>
-                    {item.quantity}x {item.name}
-                  </span>
-                  <span>${((item.quantity * item.price_cents) / 100).toFixed(2)}</span>
-                </div>
-              ))
-            )}
-            <div className="border-t pt-2 mt-2 font-bold">
-              <div className="flex justify-between">
-                <span>Total:</span>
-                <span>${(quotedTotalCents / 100).toFixed(2)}</span>
+        <div className="grid gap-8 lg:grid-cols-2">
+          {/* Order Summary */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Order Summary</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {quoteLoading ? (
+                <p className="text-muted-foreground">Calculating prices...</p>
+              ) : (
+                <>
+                  <div className="divide-y divide-border">
+                    {quotedItems.map((item) => (
+                      <div key={item.id} className="flex items-center justify-between py-3">
+                        <div>
+                          <p className="font-medium">{item.name}</p>
+                          <p className="text-sm text-muted-foreground">Qty: {item.quantity}</p>
+                        </div>
+                        <PriceDisplay cents={item.quantity * item.price_cents} size="sm" />
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="border-t border-border pt-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-lg font-bold">Total</span>
+                      <PriceDisplay cents={quotedTotalCents} size="lg" />
+                    </div>
+                  </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Contact & Payment */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Contact Information</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div>
+                <label htmlFor="email" className="mb-2 block text-sm font-medium">
+                  Email
+                </label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="your@email.com"
+                  error={!!error && !email}
+                />
               </div>
-            </div>
-          </div>
+
+              {error && (
+                <Badge variant="destructive" className="text-sm">
+                  {error}
+                </Badge>
+              )}
+
+              <Button
+                onClick={handleCheckout}
+                loading={loading}
+                className="w-full"
+                size="lg"
+              >
+                Proceed to Payment
+              </Button>
+            </CardContent>
+          </Card>
         </div>
-
-        <div className="mb-8">
-          <label className="block text-sm font-semibold mb-2">Email</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full border rounded px-4 py-2"
-            placeholder="your@email.com"
-          />
-        </div>
-
-        {error && <div className="text-danger mb-4">{error}</div>}
-
-        <button
-          onClick={handleCheckout}
-          disabled={loading}
-          className="w-full bg-primary text-white py-3 rounded font-semibold disabled:opacity-50"
-        >
-          {loading ? 'Processing...' : 'Proceed to Payment'}
-        </button>
       </div>
     </div>
   );

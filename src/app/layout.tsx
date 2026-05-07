@@ -1,10 +1,24 @@
 import type { Metadata } from 'next';
-import { Header } from '@/components/Header';
+import { Inter } from 'next/font/google';
+import { Toaster } from '@/components/ui/sonner';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import './globals.css';
 
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-sans',
+  display: 'swap',
+});
+
 export const metadata: Metadata = {
-  title: 'iRepair - Phone Repair Parts & Services',
-  description: 'Quality phone repair parts and professional services',
+  title: 'iRepair Technologies | Wholesale Cell Phone Repair Parts',
+  description: 'Premium wholesale iPhone screens, batteries, and repair parts. Sourced direct from China, stocked in Houston, delivered to repair shops across Texas.',
+  keywords: 'wholesale cell phone parts, iPhone repair parts, wholesale iPhone screens, repair shop supplies, Houston',
+  openGraph: {
+    title: 'iRepair Technologies | Wholesale Cell Phone Repair Parts',
+    description: 'Premium wholesale iPhone screens, batteries, and repair parts for professional repair shops.',
+    type: 'website',
+  },
 };
 
 export default function RootLayout({
@@ -13,10 +27,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" className={inter.variable}>
       <body className="bg-background text-foreground">
-        <Header />
-        {children}
+        <ErrorBoundary>
+          {children}
+        </ErrorBoundary>
+        <Toaster />
       </body>
     </html>
   );
