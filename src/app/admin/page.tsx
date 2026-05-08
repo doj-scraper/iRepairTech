@@ -2,13 +2,15 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { supabaseClient } from '@/lib/supabase/client';
+import { getSupabaseClient } from '@/lib/supabase/client';
+import type { InventoryPart, RepairService } from '@/lib/database.types';
+import type { User } from '@supabase/supabase-js';
 
 export default function AdminPage() {
-  const [parts, setParts] = useState<any[]>([]);
-  const [services, setServices] = useState<any[]>([]);
+  const [parts, setParts] = useState<InventoryPart[]>([]);
+  const [services, setServices] = useState<RepairService[]>([]);
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [error, setError] = useState('');
 
@@ -16,11 +18,12 @@ export default function AdminPage() {
     const checkAdmin = async () => {
       setLoading(true);
       setError('');
+      const supabase = getSupabaseClient();
 
       const {
         data: { user },
         error: userError,
-      } = await supabaseClient.auth.getUser();
+      } = await supabase.auth.getUser();
 
       if (userError) {
         setError(userError.message);
@@ -35,7 +38,7 @@ export default function AdminPage() {
         return;
       }
 
-      const { data: profile, error: profileError } = await supabaseClient
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('role')
         .eq('id', user.id)
@@ -52,8 +55,8 @@ export default function AdminPage() {
 
       if (admin) {
         const [partsRes, servicesRes] = await Promise.all([
-          supabaseClient.from('inventory_parts').select('*'),
-          supabaseClient.from('repair_services').select('*'),
+          supabase.from('inventory_parts').select('*'),
+          supabase.from('repair_services').select('*'),
         ]);
 
         setParts(partsRes.data || []);
@@ -91,7 +94,8 @@ export default function AdminPage() {
   }
 
   const updateStock = async (id: string, newStock: number) => {
-    const { error } = await supabaseClient
+    const supabase = getSupabaseClient();
+    const { error } = await supabase
       .from('inventory_parts')
       .update({ stock_count: newStock })
       .eq('id', id);
@@ -169,4 +173,3 @@ export default function AdminPage() {
     </div>
   );
 }
-

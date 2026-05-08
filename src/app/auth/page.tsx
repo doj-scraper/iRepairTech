@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { supabaseClient } from '@/lib/supabase/client';
+import { getSupabaseClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -15,7 +15,8 @@ export default function AuthPage() {
   const router = useRouter();
 
   const ensureProfile = async (userId: string, emailAddress: string) => {
-    const { error } = await supabaseClient.from('profiles').upsert(
+    const supabase = getSupabaseClient();
+    const { error } = await supabase.from('profiles').upsert(
       {
         id: userId,
         email: emailAddress,
@@ -35,10 +36,11 @@ export default function AuthPage() {
   const handleAuth = async () => {
     setLoading(true);
     setError('');
+    const supabase = getSupabaseClient();
 
     try {
       if (isSignUp) {
-        const { data, error } = await supabaseClient.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
         });
@@ -48,7 +50,7 @@ export default function AuthPage() {
         }
         setError('Check your email to confirm signup');
       } else {
-        const { data, error } = await supabaseClient.auth.signInWithPassword({
+        const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
@@ -126,4 +128,3 @@ export default function AuthPage() {
     </div>
   );
 }
-

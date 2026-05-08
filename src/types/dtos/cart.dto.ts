@@ -9,6 +9,8 @@ export type CartItemBase = {
   id: string
   type: CartItemType
   quantity: number
+  name: string
+  price_cents: number
 }
 
 export type CartItemPart = CartItemBase & {
@@ -27,6 +29,8 @@ export type AddToCartRequest = {
   id: string
   type: CartItemType
   quantity: number
+  name: string
+  price_cents: number
 }
 
 export type UpdateCartRequest = {

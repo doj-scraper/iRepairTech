@@ -2,7 +2,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { supabaseClient } from '@/lib/supabase/client';
+import { getSupabaseClient } from '@/lib/supabase/client';
 import { mapInventoryPart } from '@/lib/semantic/mapToUI';
 import { useCart } from '@/store/cart';
 import { ProductCard } from '@/components/catalog/ProductCard';
@@ -10,21 +10,23 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/ui/empty-state';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import type { RepairService } from '@/lib/database.types';
 
 export default function CatalogPage() {
-  const [parts, setParts] = useState<any[]>([]);
-  const [services, setServices] = useState<any[]>([]);
+  const [parts, setParts] = useState<ReturnType<typeof mapInventoryPart>[]>([]);
+  const [services, setServices] = useState<RepairService[]>([]);
   const [loading, setLoading] = useState(true);
   const addItem = useCart((s) => s.addItem);
 
   useEffect(() => {
     const fetchData = async () => {
+      const supabase = getSupabaseClient();
       const [partsRes, servicesRes] = await Promise.all([
-        supabaseClient
+        supabase
           .from('inventory_parts')
           .select('*')
           .eq('is_active', true),
-        supabaseClient
+        supabase
           .from('repair_services')
           .select('*')
           .eq('is_active', true),
@@ -95,17 +97,25 @@ export default function CatalogPage() {
                   key={part.id}
                   id={part.id}
                   name={part.name}
-                  description={part.description}
+                  description={part.description ?? undefined}
                   priceCents={part.price_cents}
-                  imageUrl={part.image_url}
+                  imageUrl={part.image_url ?? undefined}
                   stockCount={part.stock_count}
-                  uiIntent={part.ui_intent}
+                  uiIntent={
+                    part.ui_intent === 'out_of_stock'
+                      ? 'danger'
+                      : part.ui_intent === 'low_stock'
+                        ? 'warning'
+                        : 'neutral'
+                  }
                   type="part"
                   onAddToCart={() =>
                     addItem({
                       id: part.id,
                       type: 'part',
                       quantity: 1,
+                      name: part.name,
+                      price_cents: part.price_cents,
                     })
                   }
                 />
@@ -123,15 +133,17 @@ export default function CatalogPage() {
                   key={service.id}
                   id={service.id}
                   name={service.name}
-                  description={service.description}
+                  description={service.description ?? undefined}
                   priceCents={service.price_cents}
-                  imageUrl={service.image_url}
+                  imageUrl={service.image_url ?? undefined}
                   type="service"
                   onAddToCart={() =>
                     addItem({
                       id: service.id,
                       type: 'service',
                       quantity: 1,
+                      name: service.name,
+                      price_cents: service.price_cents,
                     })
                   }
                 />
@@ -143,4 +155,3 @@ export default function CatalogPage() {
     </div>
   );
 }
-

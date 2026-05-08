@@ -20,6 +20,8 @@ CREATE TABLE IF NOT EXISTS public.order_state_transitions (
   PRIMARY KEY (from_state, to_state)
 );
 
+ALTER TABLE public.order_state_transitions ENABLE ROW LEVEL SECURITY;
+
 -- 3. Seed valid transitions
 INSERT INTO public.order_state_transitions (from_state, to_state) VALUES
   ('pending', 'paid'),
@@ -48,6 +50,8 @@ CREATE TABLE IF NOT EXISTS public.order_state_history (
   changed_at TIMESTAMPTZ DEFAULT now(),
   metadata JSONB
 );
+
+ALTER TABLE public.order_state_history ENABLE ROW LEVEL SECURITY;
 
 -- 5. Enforced transition function (ONLY write path)
 CREATE OR REPLACE FUNCTION public.transition_order_state(
@@ -91,4 +95,47 @@ BEGIN
 END;
 $$;
 
-GRANT EXECUTE ON FUNCTION public.transition_order_state TO authenticated;
+REVOKE EXECUTE ON FUNCTION public.transition_order_state FROM authenticated;
+GRANT EXECUTE ON FUNCTION public.transition_order_state TO service_role;
+
+DROP POLICY IF EXISTS admin_read_order_state_transitions ON public.order_state_transitions;
+CREATE POLICY admin_read_order_state_transitions
+ON public.order_state_transitions
+FOR SELECT
+USING (
+  EXISTS (
+    SELECT 1
+    FROM public.profiles
+    WHERE id = auth.uid()
+      AND role = 'admin'
+  )
+);
+
+DROP POLICY IF EXISTS public_read_order_state_transitions ON public.order_state_transitions;
+CREATE POLICY public_read_order_state_transitions
+ON public.order_state_transitions
+FOR SELECT
+USING (true);
+
+DROP POLICY IF EXISTS admin_read_order_state_history ON public.order_state_history;
+CREATE POLICY admin_read_order_state_history
+ON public.order_state_history
+FOR SELECT
+USING (
+  EXISTS (
+    SELECT 1
+    FROM public.profiles
+    WHERE id = auth.uid()
+      AND role = 'admin'
+  )
+);
+
+DROP POLICY IF EXISTS user_read_own_order_state_history ON public.order_state_history;
+CREATE POLICY user_read_own_order_state_history
+ON public.order_state_history
+FOR SELECT
+USING (
+  order_id IN (
+    SELECT id FROM public.orders WHERE user_id = auth.uid()
+  )
+);
