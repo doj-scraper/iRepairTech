@@ -20,7 +20,7 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
   const updateQuantity = useCart((s) => s.updateQuantity);
   const clear = useCart((s) => s.clear);
 
-  const total = items.reduce((sum, i) => sum + i.quantity * 1000, 0);
+  const total = items.reduce((sum, i) => sum + i.quantity * i.price_cents, 0);
 
   return (
     <>
@@ -82,7 +82,7 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex-1">
-                          <p className="font-medium">Item {item.id.slice(0, 8)}</p>
+                          <p className="font-medium">{item.name}</p>
                           <p className="text-sm text-muted-foreground">
                             Type: {item.type}
                           </p>
@@ -118,7 +118,7 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
                             <Plus className="h-3 w-3" />
                           </button>
                         </div>
-                        <PriceDisplay cents={item.quantity * 10000} size="sm" />
+                        <PriceDisplay cents={item.quantity * item.price_cents} size="sm" />
                       </div>
                     </CardContent>
                   </Card>
@@ -157,4 +157,3 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
     </>
   );
 }
-

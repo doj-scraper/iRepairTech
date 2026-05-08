@@ -44,11 +44,11 @@ export function AnnouncementMarquee({ className }: AnnouncementMarqueeProps) {
       label: currentDate || 'Loading...',
       detail: weather,
     },
-    {
-      label: 'NEW PARTS IN STOCK',
-      detail: 'iPhone Screen INCELL — 8 through 17 Pro Max',
-      href: '/catalog',
-    },
+      {
+        label: 'NEW PARTS IN STOCK',
+        detail: 'iPhone Screen INCELL — 8 through 17 Pro Max',
+        href: '/shop/catalog',
+      },
   ];
 
   const loopedItems = [...items, ...items];

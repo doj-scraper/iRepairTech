@@ -5,7 +5,7 @@ import { ShoppingCart, LogIn, LogOut } from "lucide-react";
 import { useCart } from "@/store/cart";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { createClient } from "@/lib/supabase/client";
+import { getSupabaseClient } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
 import { User } from "@supabase/supabase-js";
 import { CartDrawer } from "@/components/CartDrawer";
@@ -20,11 +20,11 @@ export function Header() {
   const { items } = useCart();
   const [user, setUser] = useState<User | null>(null);
   const [cartOpen, setCartOpen] = useState(false);
-  const supabase = createClient();
   
   const count = items.reduce((a, i) => a + i.quantity, 0);
 
   useEffect(() => {
+    const supabase = getSupabaseClient();
     supabase.auth.getUser().then(({ data }) => setUser(data.user));
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
@@ -33,6 +33,7 @@ export function Header() {
   }, []);
 
   const handleSignOut = async () => {
+    const supabase = getSupabaseClient();
     await supabase.auth.signOut();
   };
 

@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { supabaseService } from '@/lib/supabase/service';
 import { stripe } from '@/lib/stripe/client';
 import { checkoutRequestSchema } from '@/types/dtos/checkout.dto';
 import type { CheckoutItem } from '@/types/dtos/checkout.dto';
+import type { Order } from '@/lib/database.types';
 
 async function cleanupCheckoutDraft(orderId?: string, sessionId?: string | null) {
   if (sessionId) {
@@ -17,10 +18,9 @@ async function cleanupCheckoutDraft(orderId?: string, sessionId?: string | null)
     return;
   }
 
-  const supabase = createClient();
-  await supabase.from('order_items_parts').delete().eq('order_id', orderId);
-  await supabase.from('order_items_services').delete().eq('order_id', orderId);
-  await supabase.from('orders').delete().eq('id', orderId);
+  await supabaseService.from('order_items_parts').delete().eq('order_id', orderId);
+  await supabaseService.from('order_items_services').delete().eq('order_id', orderId);
+  await supabaseService.from('orders').delete().eq('id', orderId);
 }
 
 export async function POST(req: Request) {
@@ -40,21 +40,19 @@ export async function POST(req: Request) {
 
     const { items, email } = parsed.data;
 
-    const supabase = createClient();
-
     // 1. Fetch authoritative prices
     const partIds = items.filter((i: CheckoutItem) => i.type === 'part').map((i: CheckoutItem) => i.id);
     const serviceIds = items.filter((i: CheckoutItem) => i.type === 'service').map((i: CheckoutItem) => i.id);
 
     const [partsRes, servicesRes] = await Promise.all([
       partIds.length > 0
-        ? supabase
+        ? supabaseService
             .from('inventory_parts')
             .select('id, name, price_cents, stock_count, moq')
             .in('id', partIds)
         : Promise.resolve({ data: [] as Array<{ id: string; name: string; price_cents: number; stock_count: number; moq: number }> }),
       serviceIds.length > 0
-        ? supabase
+        ? supabaseService
             .from('repair_services')
             .select('id, name, price_cents')
             .in('id', serviceIds)
@@ -105,7 +103,7 @@ export async function POST(req: Request) {
     );
 
     // 4. Create a draft order
-    const { data: order, error: orderError } = await supabase
+    const { data: order, error: orderError } = await supabaseService
       .from('orders')
       .insert({
         stripe_session_id: `draft_${crypto.randomUUID()}`,
@@ -115,7 +113,7 @@ export async function POST(req: Request) {
       .select()
       .single();
 
-    if (orderError) throw orderError;
+    if (orderError || !order) throw orderError || new Error('Failed to create order');
     orderId = order.id;
 
     // 5. Create order items
@@ -145,14 +143,14 @@ export async function POST(req: Request) {
       });
 
     if (partItems.length > 0) {
-      const { error: itemsError } = await supabase
+      const { error: itemsError } = await supabaseService
         .from('order_items_parts')
         .insert(partItems);
       if (itemsError) throw itemsError;
     }
 
     if (serviceItems.length > 0) {
-      const { error: itemsError } = await supabase
+      const { error: itemsError } = await supabaseService
         .from('order_items_services')
         .insert(serviceItems);
       if (itemsError) throw itemsError;
@@ -178,7 +176,7 @@ export async function POST(req: Request) {
     createdSessionId = session.id;
 
     // 7. Attach session to order
-    const { error: updateError } = await supabase
+    const { error: updateError } = await supabaseService
       .from('orders')
       .update({ stripe_session_id: session.id })
       .eq('id', order.id);

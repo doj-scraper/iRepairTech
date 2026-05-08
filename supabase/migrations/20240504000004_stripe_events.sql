@@ -7,5 +7,7 @@ create table public.stripe_events (
   created_at timestamptz default now()
 );
 
+alter table public.stripe_events enable row level security;
+
 create index idx_stripe_events_event_id on public.stripe_events(event_id);
 create index idx_stripe_events_processed on public.stripe_events(processed);

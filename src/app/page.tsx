@@ -1,5 +1,3 @@
-export const dynamic = 'force-dynamic';
-
 import Link from "next/link";
 import { AnnouncementMarquee } from "@/components/AnnouncementMarquee";
 import { Header } from "@/components/Header";
@@ -7,6 +5,8 @@ import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
 import Image from "next/image";
+
+export const dynamic = 'force-dynamic';
 
 export default function HomePage() {
   return (
@@ -36,7 +36,7 @@ export default function HomePage() {
                     className="h-12 w-full border border-white/20 bg-white/10 pl-10 pr-4 text-white placeholder:text-white/60 backdrop-blur-sm focus:border-white/40 focus:outline-none focus:ring-2 focus:ring-white/20"
                   />
                 </div>
-                <Link href="/catalog">
+                <Link href="/shop/catalog">
                   <Button size="lg" className="h-12 bg-white text-primary hover:bg-white/90">
                     Browse Catalog
                   </Button>
@@ -71,7 +71,7 @@ export default function HomePage() {
                     <span className="text-3xl font-bold text-primary">$85.00</span>
                     <span className="text-sm text-muted-foreground">MOQ: 10 units</span>
                   </div>
-                  <Link href="/catalog">
+                  <Link href="/shop/catalog">
                     <Button size="lg" className="w-full gradient-primary text-white">
                       View in Catalog
                     </Button>

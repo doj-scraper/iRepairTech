@@ -3,7 +3,6 @@
 
 import { useEffect, useState } from 'react';
 import { useCart } from '@/store/cart';
-import { supabaseClient } from '@/lib/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -11,14 +10,8 @@ import { Badge } from '@/components/ui/badge';
 import { PriceDisplay } from '@/components/ui/price-display';
 import { EmptyState } from '@/components/ui/empty-state';
 import Link from 'next/link';
-
-type QuotedItem = {
-  id: string;
-  type: 'part' | 'service';
-  quantity: number;
-  name: string;
-  price_cents: number;
-};
+import type { CartItem } from '@/lib/schema';
+import { getSupabaseClient } from '@/lib/supabase/client';
 
 export default function CheckoutPage() {
   const items = useCart((s) => s.items);
@@ -27,7 +20,7 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [quoteLoading, setQuoteLoading] = useState(true);
-  const [quotedItems, setQuotedItems] = useState<QuotedItem[]>([]);
+  const [quotedItems, setQuotedItems] = useState<CartItem[]>([]);
   const [quotedTotalCents, setQuotedTotalCents] = useState(0);
 
   useEffect(() => {
@@ -42,6 +35,7 @@ export default function CheckoutPage() {
       }
 
       setQuoteLoading(true);
+      const supabase = getSupabaseClient();
 
       try {
         const partIds = items
@@ -53,13 +47,13 @@ export default function CheckoutPage() {
 
         const [partsRes, servicesRes] = await Promise.all([
           partIds.length > 0
-            ? supabaseClient
+            ? supabase
                 .from('inventory_parts')
                 .select('id, name, price_cents')
                 .in('id', partIds)
             : Promise.resolve({ data: [] }),
           serviceIds.length > 0
-            ? supabaseClient
+            ? supabase
                 .from('repair_services')
                 .select('id, name, price_cents')
                 .in('id', serviceIds)
@@ -73,8 +67,8 @@ export default function CheckoutPage() {
               id: item.id,
               type: item.type,
               quantity: item.quantity,
-              name: part?.name || item.id,
-              price_cents: part?.price_cents || 0,
+              name: part?.name || item.name,
+              price_cents: part?.price_cents || item.price_cents,
             };
           }
 
@@ -83,8 +77,8 @@ export default function CheckoutPage() {
             id: item.id,
             type: item.type,
             quantity: item.quantity,
-            name: service?.name || item.id,
-            price_cents: service?.price_cents || 0,
+            name: service?.name || item.name,
+            price_cents: service?.price_cents || item.price_cents,
           };
         });
 
@@ -238,4 +232,3 @@ export default function CheckoutPage() {
     </div>
   );
 }
-

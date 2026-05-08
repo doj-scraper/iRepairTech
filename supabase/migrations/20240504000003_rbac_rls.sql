@@ -9,6 +9,13 @@ alter table public.order_items_parts enable row level security;
 alter table public.order_items_services enable row level security;
 alter table public.profiles enable row level security;
 
+alter table public.profiles
+drop constraint if exists profiles_role_check;
+
+alter table public.profiles
+add constraint profiles_role_check
+check (role in ('customer', 'admin'));
+
 -- =========================================
 -- PUBLIC READ (CATALOG)
 -- =========================================
@@ -130,4 +137,4 @@ using (auth.uid() = id);
 create policy "user_insert_profile"
 on public.profiles
 for insert
-with check (auth.uid() = id);
+with check (auth.uid() = id and role = 'customer');
