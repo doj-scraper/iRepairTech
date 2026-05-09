@@ -1,24 +1,23 @@
-import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import type { Metadata, Viewport } from 'next';
 import { Toaster } from '@/components/ui/sonner';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import './globals.css';
 
-const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-sans',
-  display: 'swap',
-});
-
 export const metadata: Metadata = {
   title: 'iRepair Technologies | Wholesale Cell Phone Repair Parts',
-  description: 'Premium wholesale iPhone screens, batteries, and repair parts. Sourced direct from China, stocked in Houston, delivered to repair shops across Texas.',
+  description:
+    'Premium wholesale cellphone repair parts for professional shops. Houston-stocked screens, batteries, and components with operational-grade fulfillment.',
   keywords: 'wholesale cell phone parts, iPhone repair parts, wholesale iPhone screens, repair shop supplies, Houston',
   openGraph: {
     title: 'iRepair Technologies | Wholesale Cell Phone Repair Parts',
-    description: 'Premium wholesale iPhone screens, batteries, and repair parts for professional repair shops.',
+    description:
+      'Houston wholesale parts template with premium operations-focused merchandising, checkout, and customer account flows.',
     type: 'website',
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: '#101A2A',
 };
 
 export default function RootLayout({
@@ -27,8 +26,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={inter.variable}>
-      <body className="bg-background text-foreground">
+    <html lang="en">
+      <body className="min-h-screen bg-background text-foreground antialiased">
+        <a href="#main-content" className="skip-link">
+          Skip to main content
+        </a>
         <ErrorBoundary>
           {children}
         </ErrorBoundary>
@@ -37,4 +39,3 @@ export default function RootLayout({
     </html>
   );
 }
-

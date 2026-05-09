@@ -1,4 +1,10 @@
 import Link from 'next/link';
+import { ArrowRight, CheckCircle2, ClipboardList, ShieldCheck } from 'lucide-react';
+import { Footer } from '@/components/Footer';
+import { Header } from '@/components/Header';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { formatCurrency } from '@/lib/formatters';
 import { stripe } from '@/lib/stripe/client';
 
 export const dynamic = 'force-dynamic';
@@ -16,59 +22,104 @@ function getSessionId(searchParams?: SuccessPageProps['searchParams']) {
 
 export default async function SuccessPage({ searchParams }: SuccessPageProps) {
   const sessionId = getSessionId(searchParams);
-  let paymentStatus = 'unknown';
-  let sessionStatus = 'unknown';
+  let paymentStatus = 'unavailable';
+  let sessionStatus = 'unavailable';
+  let customerEmail: string | null = null;
+  let totalCents = 0;
 
   if (sessionId) {
     try {
       const session = await stripe.checkout.sessions.retrieve(sessionId);
       paymentStatus = session.payment_status;
       sessionStatus = session.status ?? 'unknown';
+      customerEmail = session.customer_details?.email ?? session.customer_email ?? null;
+      totalCents = session.amount_total ?? 0;
     } catch {
-      paymentStatus = 'unavailable';
-      sessionStatus = 'unavailable';
+      paymentStatus = 'verification unavailable';
+      sessionStatus = 'verification unavailable';
     }
   }
 
   return (
-    <div className="min-h-screen bg-background p-8">
-      <div className="max-w-2xl mx-auto text-center">
-        <div className="text-6xl mb-4">✓</div>
-        <h1 className="text-4xl font-bold mb-4 text-success">
-          Payment Successful!
-        </h1>
-        <p className="text-lg text-muted mb-8">
-          Your order has been confirmed and is being processed.
-        </p>
+    <div className="min-h-screen bg-background">
+      <Header />
+      <main id="main-content" className="px-4 py-8 md:px-6 md:py-12">
+        <div className="container space-y-8">
+          <section className="shell-frame overflow-hidden">
+            <div className="shell-core grid gap-8 px-6 py-8 md:grid-cols-[1.05fr_0.95fr] md:px-10 md:py-12">
+              <div className="space-y-5">
+                <Badge variant="success">Payment confirmed</Badge>
+                <div className="inline-flex h-14 w-14 items-center justify-center rounded-full border border-primary/20 bg-primary/10 text-primary">
+                  <CheckCircle2 className="h-7 w-7" />
+                </div>
+                <h1 className="font-display text-4xl font-semibold tracking-[-0.06em] text-primary md:text-6xl">
+                  Your order is now in the system and ready for fulfillment flow.
+                </h1>
+                <p className="max-w-2xl text-base text-muted-foreground md:text-lg">
+                  The success state now feels like part of the same branded business: verified, inventory-aware, and connected to the buyer dashboard.
+                </p>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {[
+                    { icon: ClipboardList, title: 'Dashboard ready', body: 'Customers can move directly into their order history and account view.' },
+                    { icon: ShieldCheck, title: 'Confirmation locked in', body: 'Payment confirmation, account follow-through, and next-step guidance stay in one branded state.' },
+                  ].map((item) => (
+                    <div key={item.title} className="rounded-[1.5rem] border border-hairline/70 bg-secondary/35 p-4">
+                      <item.icon className="h-5 w-5 text-accent" />
+                      <h2 className="mt-4 font-semibold text-primary">{item.title}</h2>
+                      <p className="mt-2 text-sm text-muted-foreground">{item.body}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
 
-        <div className="bg-muted p-6 rounded-lg mb-8 text-left">
-          <p className="mb-2">
-            <strong>Session ID:</strong> {sessionId ?? 'missing'}
-          </p>
-          <p className="mb-2">
-            <strong>Payment status:</strong>{' '}
-            <span className="text-success font-semibold">{paymentStatus}</span>
-          </p>
-          <p>
-            <strong>Checkout status:</strong> {sessionStatus}
-          </p>
-        </div>
+              <div className="shell-frame bg-transparent">
+                <div className="shell-core h-full px-6 py-8">
+                  <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">Order confirmation</p>
+                  <div className="mt-6 space-y-4">
+                    <div className="rounded-[1.5rem] border border-hairline/70 bg-secondary/35 p-4">
+                      <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Confirmation email</p>
+                      <p className="mt-2 font-semibold text-primary">{customerEmail ?? 'Sent to the address used during checkout'}</p>
+                    </div>
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <div className="rounded-[1.5rem] border border-hairline/70 bg-secondary/35 p-4">
+                        <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Payment confirmation</p>
+                        <p className="mt-2 font-semibold capitalize text-primary">{paymentStatus}</p>
+                      </div>
+                      <div className="rounded-[1.5rem] border border-hairline/70 bg-secondary/35 p-4">
+                        <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Processing state</p>
+                        <p className="mt-2 font-semibold capitalize text-primary">{sessionStatus}</p>
+                      </div>
+                    </div>
+                    <div className="rounded-[1.5rem] border border-hairline/70 bg-secondary/35 p-4">
+                      <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Captured total</p>
+                      <p className="mt-2 font-semibold text-primary">{formatCurrency(totalCents)}</p>
+                    </div>
+                    <div className="rounded-[1.5rem] border border-hairline/70 bg-secondary/35 p-4">
+                      <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">What happens next</p>
+                      <p className="mt-2 text-sm text-muted-foreground">
+                        Trade support will review stock allocation, prepare fulfillment, and keep the order visible in your dashboard for follow-up.
+                      </p>
+                    </div>
+                  </div>
 
-        <div className="flex gap-4 justify-center">
-          <Link
-            href="/dashboard"
-            className="bg-primary text-white px-6 py-3 rounded font-semibold hover:opacity-90"
-          >
-            View Orders
-          </Link>
-          <Link
-            href="/shop/catalog"
-            className="border border-primary text-primary px-6 py-3 rounded font-semibold hover:bg-primary hover:text-white"
-          >
-            Continue Shopping
-          </Link>
+                  <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                    <Button asChild className="sm:flex-1">
+                      <Link href="/dashboard">
+                        View dashboard
+                        <ArrowRight className="h-4 w-4" />
+                      </Link>
+                    </Button>
+                    <Button asChild className="sm:flex-1" variant="outline">
+                      <Link href="/shop/catalog">Continue shopping</Link>
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
         </div>
-      </div>
+      </main>
+      <Footer />
     </div>
   );
 }

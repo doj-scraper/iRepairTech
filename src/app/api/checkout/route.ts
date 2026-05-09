@@ -1,9 +1,22 @@
 import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
+import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { supabaseService } from '@/lib/supabase/service';
 import { stripe } from '@/lib/stripe/client';
+import { publicConfig } from '@/lib/config';
+import type { Database } from '@/lib/database.types';
 import { checkoutRequestSchema } from '@/types/dtos/checkout.dto';
 import type { CheckoutItem } from '@/types/dtos/checkout.dto';
-import type { Order } from '@/lib/database.types';
+
+async function releaseInventoryReservation(orderId: string) {
+  const { error } = await supabaseService.rpc('release_inventory_for_order', {
+    p_order_id: orderId,
+  });
+
+  if (error) {
+    throw error;
+  }
+}
 
 async function cleanupCheckoutDraft(orderId?: string, sessionId?: string | null) {
   if (sessionId) {
@@ -18,6 +31,13 @@ async function cleanupCheckoutDraft(orderId?: string, sessionId?: string | null)
     return;
   }
 
+  try {
+    await releaseInventoryReservation(orderId);
+  } catch (error) {
+    console.error('Failed to release reserved inventory during checkout cleanup:', error);
+    throw error;
+  }
+
   await supabaseService.from('order_items_parts').delete().eq('order_id', orderId);
   await supabaseService.from('order_items_services').delete().eq('order_id', orderId);
   await supabaseService.from('orders').delete().eq('id', orderId);
@@ -28,6 +48,29 @@ export async function POST(req: Request) {
   let createdSessionId: string | null = null;
 
   try {
+    const cookieStore = cookies();
+    const supabase = createServerClient<Database>(
+      publicConfig.NEXT_PUBLIC_SUPABASE_URL,
+      publicConfig.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+      {
+        cookies: {
+          get(name: string) {
+            return cookieStore.get(name)?.value;
+          },
+          set(...args: [string, string, CookieOptions]) {
+            void args;
+          },
+          remove(...args: [string, CookieOptions]) {
+            void args;
+          },
+        },
+      },
+    );
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
     const body = await req.json();
     const parsed = checkoutRequestSchema.safeParse(body);
 
@@ -106,9 +149,13 @@ export async function POST(req: Request) {
     const { data: order, error: orderError } = await supabaseService
       .from('orders')
       .insert({
+        user_id: user?.id ?? null,
         stripe_session_id: `draft_${crypto.randomUUID()}`,
         total_cents,
-        status: 'pending'
+        status: 'pending',
+        accepted_terms: true,
+        accepted_terms_at: new Date().toISOString(),
+        terms_version: 'wholesale-v1',
       })
       .select()
       .single();
@@ -156,7 +203,18 @@ export async function POST(req: Request) {
       if (itemsError) throw itemsError;
     }
 
-    // 6. Create Stripe session
+    // 6. Reserve inventory before Stripe checkout so stock cannot be oversold
+    if (partItems.length > 0) {
+      const { error: reserveError } = await supabaseService.rpc('reserve_inventory_for_order', {
+        p_order_id: order.id,
+      });
+
+      if (reserveError) {
+        throw reserveError;
+      }
+    }
+
+    // 7. Create Stripe session
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       line_items,
@@ -164,8 +222,8 @@ export async function POST(req: Request) {
       payment_intent_data: {
         metadata: { order_id: order.id }
       },
-      success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/error?reason=Payment+cancelled`,
+      success_url: `${publicConfig.NEXT_PUBLIC_SITE_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${publicConfig.NEXT_PUBLIC_SITE_URL}/error?reason=Payment+cancelled`,
       customer_email: email
     });
 
@@ -175,7 +233,7 @@ export async function POST(req: Request) {
 
     createdSessionId = session.id;
 
-    // 7. Attach session to order
+    // 8. Attach session to order
     const { error: updateError } = await supabaseService
       .from('orders')
       .update({ stripe_session_id: session.id })

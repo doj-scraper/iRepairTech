@@ -13,29 +13,20 @@ export function PriceDisplay({
   size = 'md',
   showCents = true,
 }: PriceDisplayProps) {
-  const dollars = Math.floor(cents / 100);
-  const remainingCents = cents % 100;
-
   const sizeClasses = {
     sm: 'text-sm',
-    md: 'text-xl font-bold',
-    lg: 'text-3xl font-bold',
+    md: 'text-xl font-semibold',
+    lg: 'text-3xl font-semibold',
   };
 
-  const centSizeClasses = {
-    sm: 'text-xs',
-    md: 'text-sm',
-    lg: 'text-lg',
-  };
+  const formatted = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: showCents ? 2 : 0,
+    maximumFractionDigits: showCents ? 2 : 0,
+  }).format(cents / 100);
 
   return (
-    <span className={cn(sizeClasses[size], className)}>
-      ${dollars}
-      {showCents && (
-        <span className={cn(centSizeClasses[size], 'text-muted-foreground')}>
-          .{remainingCents.toString().padStart(2, '0')}
-        </span>
-      )}
-    </span>
+    <span className={cn('tabular-nums text-primary', sizeClasses[size], className)}>{formatted}</span>
   );
 }

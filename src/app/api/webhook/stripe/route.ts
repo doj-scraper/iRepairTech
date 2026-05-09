@@ -24,7 +24,7 @@ export async function POST(req: Request) {
       .upsert({
         event_id: event.id,
         type: event.type,
-        payload: event,
+        payload: JSON.parse(JSON.stringify(event)),
         processed: false
       }, {
         onConflict: 'event_id',

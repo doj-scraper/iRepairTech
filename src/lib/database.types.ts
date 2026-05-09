@@ -118,6 +118,7 @@ export type OrderItemPart = {
 }
 
 export type OrderItemPartInsert = Omit<OrderItemPart, 'id'>
+export type OrderItemPartUpdate = Partial<Omit<OrderItemPart, 'id'>>
 
 // =========================================
 // ORDER ITEMS (SERVICES)
@@ -131,6 +132,7 @@ export type OrderItemService = {
 }
 
 export type OrderItemServiceInsert = Omit<OrderItemService, 'id'>
+export type OrderItemServiceUpdate = Partial<Omit<OrderItemService, 'id'>>
 
 // =========================================
 // ORDER STATE
@@ -140,6 +142,7 @@ export type OrderStateTransition = {
   from_state: OrderStatus
   to_state: OrderStatus
 }
+export type OrderStateTransitionUpdate = Partial<OrderStateTransition>
 
 export type OrderStateHistory = {
   id: string
@@ -151,6 +154,24 @@ export type OrderStateHistory = {
 }
 
 export type OrderStateHistoryInsert = Omit<OrderStateHistory, 'id' | 'changed_at'>
+export type OrderStateHistoryUpdate = Partial<Omit<OrderStateHistory, 'id' | 'changed_at'>>
+
+// =========================================
+// INVENTORY RESERVATIONS
+// =========================================
+
+export type InventoryReservation = {
+  id: string
+  order_id: string
+  part_id: string
+  quantity: number
+  status: 'reserved' | 'released' | 'consumed'
+  created_at: string
+  updated_at: string
+}
+
+export type InventoryReservationInsert = Omit<InventoryReservation, 'id' | 'created_at' | 'updated_at'>
+export type InventoryReservationUpdate = Partial<Omit<InventoryReservation, 'id' | 'created_at'>>
 
 // =========================================
 // STRIPE EVENTS
@@ -166,6 +187,7 @@ export type StripeEvent = {
 }
 
 export type StripeEventInsert = Omit<StripeEvent, 'id' | 'created_at'>
+export type StripeEventUpdate = Partial<Omit<StripeEvent, 'id' | 'created_at'>>
 
 // =========================================
 // CONTACT SUBMISSIONS
@@ -181,6 +203,7 @@ export type ContactSubmission = {
 }
 
 export type ContactSubmissionInsert = Omit<ContactSubmission, 'id' | 'created_at'>
+export type ContactSubmissionUpdate = Partial<Omit<ContactSubmission, 'id' | 'created_at'>>
 
 // =========================================
 // DATABASE TABLES
@@ -193,15 +216,44 @@ export type Database = {
       inventory_parts: { Row: InventoryPart; Insert: InventoryPartInsert; Update: InventoryPartUpdate; Relationships: [] }
       repair_services: { Row: RepairService; Insert: RepairServiceInsert; Update: RepairServiceUpdate; Relationships: [] }
       orders: { Row: Order; Insert: OrderInsert; Update: OrderUpdate; Relationships: [] }
-      order_items_parts: { Row: OrderItemPart; Insert: OrderItemPartInsert; Relationships: [] }
-      order_items_services: { Row: OrderItemService; Insert: OrderItemServiceInsert; Relationships: [] }
-      order_state_transitions: { Row: OrderStateTransition; Insert: OrderStateTransition; Relationships: [] }
-      order_state_history: { Row: OrderStateHistory; Insert: OrderStateHistoryInsert; Relationships: [] }
-      stripe_events: { Row: StripeEvent; Insert: StripeEventInsert; Relationships: [] }
-      contact_submissions: { Row: ContactSubmission; Insert: ContactSubmissionInsert; Relationships: [] }
+      order_items_parts: { Row: OrderItemPart; Insert: OrderItemPartInsert; Update: OrderItemPartUpdate; Relationships: [] }
+      order_items_services: { Row: OrderItemService; Insert: OrderItemServiceInsert; Update: OrderItemServiceUpdate; Relationships: [] }
+      order_state_transitions: { Row: OrderStateTransition; Insert: OrderStateTransition; Update: OrderStateTransitionUpdate; Relationships: [] }
+      order_state_history: { Row: OrderStateHistory; Insert: OrderStateHistoryInsert; Update: OrderStateHistoryUpdate; Relationships: [] }
+      inventory_reservations: { Row: InventoryReservation; Insert: InventoryReservationInsert; Update: InventoryReservationUpdate; Relationships: [] }
+      stripe_events: { Row: StripeEvent; Insert: StripeEventInsert; Update: StripeEventUpdate; Relationships: [] }
+      contact_submissions: { Row: ContactSubmission; Insert: ContactSubmissionInsert; Update: ContactSubmissionUpdate; Relationships: [] }
+    }
+    Views: Record<string, never>
+    Functions: {
+      pg_advisory_lock: {
+        Args: {
+          lockid: number
+        }
+        Returns: boolean
+      }
+      pg_advisory_unlock: {
+        Args: {
+          lockid: number
+        }
+        Returns: boolean
+      }
+      reserve_inventory_for_order: {
+        Args: {
+          p_order_id: string
+        }
+        Returns: undefined
+      }
+      release_inventory_for_order: {
+        Args: {
+          p_order_id: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       order_status: OrderStatus
     }
+    CompositeTypes: Record<string, never>
   }
 }

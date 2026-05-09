@@ -44,4 +44,3 @@ export async function finalizeOrder(event: StripeEventRecord) {
 
   console.log(`Order ${orderId} finalized`);
 }
-

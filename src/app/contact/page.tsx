@@ -14,6 +14,7 @@ import { toast } from "sonner";
 
 export default function ContactPage() {
   const [loading, setLoading] = useState(false);
+  const [subject, setSubject] = useState('');
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -66,8 +67,9 @@ export default function ContactPage() {
 
             <div className="space-y-2">
               <Label htmlFor="subject">Subject</Label>
-              <Select name="subject" required>
-                <SelectTrigger>
+              <input type="hidden" name="subject" value={subject} />
+              <Select name="subject" required value={subject} onValueChange={setSubject}>
+                <SelectTrigger id="subject">
                   <SelectValue placeholder="Select a subject" />
                 </SelectTrigger>
                 <SelectContent>

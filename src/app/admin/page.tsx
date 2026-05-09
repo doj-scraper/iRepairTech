@@ -1,175 +1,79 @@
+import { redirect } from 'next/navigation';
+import { AdminBoard } from '@/components/admin/AdminBoard';
+import type {
+  ContactSubmission,
+  InventoryPart,
+  Order,
+  Profile,
+  RepairService,
+} from '@/lib/database.types';
+import { supabaseService } from '@/lib/supabase/service';
+import { createClient } from '@/lib/supabase/server';
 
-'use client';
+export const dynamic = 'force-dynamic';
 
-import { useEffect, useState } from 'react';
-import { getSupabaseClient } from '@/lib/supabase/client';
-import type { InventoryPart, RepairService } from '@/lib/database.types';
-import type { User } from '@supabase/supabase-js';
-
-export default function AdminPage() {
-  const [parts, setParts] = useState<InventoryPart[]>([]);
-  const [services, setServices] = useState<RepairService[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<User | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    const checkAdmin = async () => {
-      setLoading(true);
-      setError('');
-      const supabase = getSupabaseClient();
-
-      const {
-        data: { user },
-        error: userError,
-      } = await supabase.auth.getUser();
-
-      if (userError) {
-        setError(userError.message);
-        setLoading(false);
-        return;
-      }
-
-      setUser(user);
-
-      if (!user) {
-        setLoading(false);
-        return;
-      }
-
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .single();
-
-      if (profileError) {
-        setError(profileError.message);
-        setLoading(false);
-        return;
-      }
-
-      const admin = profile?.role === 'admin';
-      setIsAdmin(admin);
-
-      if (admin) {
-        const [partsRes, servicesRes] = await Promise.all([
-          supabase.from('inventory_parts').select('*'),
-          supabase.from('repair_services').select('*'),
-        ]);
-
-        setParts(partsRes.data || []);
-        setServices(servicesRes.data || []);
-      }
-
-      setLoading(false);
-    };
-
-    checkAdmin();
-  }, []);
-
-  if (loading) return <div className="p-8">Loading...</div>;
+export default async function AdminPage() {
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   if (!user) {
-    return (
-      <div className="min-h-screen bg-background p-8">
-        <p className="text-muted">Please log in to access admin panel</p>
-      </div>
-    );
+    redirect('/auth?redirectTo=/admin');
   }
 
-  if (!isAdmin) {
-    return (
-      <div className="min-h-screen bg-background p-8">
-        <div className="max-w-2xl mx-auto">
-          <h1 className="text-3xl font-bold mb-4">Admin Panel</h1>
-          <p className="text-muted">
-            You are signed in, but this account does not have admin access.
-          </p>
-          {error && <p className="text-danger mt-4">{error}</p>}
-        </div>
-      </div>
-    );
+  const { data: profileData, error: profileError } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', user.id)
+    .single();
+
+  if (profileError) {
+    throw profileError;
   }
 
-  const updateStock = async (id: string, newStock: number) => {
-    const supabase = getSupabaseClient();
-    const { error } = await supabase
-      .from('inventory_parts')
-      .update({ stock_count: newStock })
-      .eq('id', id);
+  const profile = profileData as Profile | null;
 
-    if (error) {
-      setError(error.message);
-      return;
-    }
+  if (!profile || profile.role !== 'admin') {
+    redirect('/dashboard');
+  }
 
-    setParts(
-      parts.map((p) => (p.id === id ? { ...p, stock_count: newStock } : p))
-    );
-  };
+  const [partsRes, servicesRes, ordersRes, customersRes, contactRes] = await Promise.all([
+    supabaseService.from('inventory_parts').select('*').order('stock_count', { ascending: true }),
+    supabaseService.from('repair_services').select('*').order('name', { ascending: true }),
+    supabaseService.from('orders').select('*').order('created_at', { ascending: false }).limit(8),
+    supabaseService.from('profiles').select('*').eq('role', 'customer').order('created_at', { ascending: false }).limit(6),
+    supabaseService.from('contact_submissions').select('*').order('created_at', { ascending: false }).limit(6),
+  ]);
+
+  if (partsRes.error) {
+    throw partsRes.error;
+  }
+
+  if (servicesRes.error) {
+    throw servicesRes.error;
+  }
+
+  if (ordersRes.error) {
+    throw ordersRes.error;
+  }
+
+  if (customersRes.error) {
+    throw customersRes.error;
+  }
+
+  if (contactRes.error) {
+    throw contactRes.error;
+  }
 
   return (
-    <div className="min-h-screen bg-background p-8">
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8">Admin Panel</h1>
-        {error && <p className="mb-6 text-danger">{error}</p>}
-
-        <div className="mb-12">
-          <h2 className="text-2xl font-bold mb-4">Parts Inventory</h2>
-          <div className="overflow-x-auto border rounded-lg">
-            <table className="w-full">
-              <thead className="bg-muted">
-                <tr>
-                  <th className="px-4 py-2 text-left">SKU</th>
-                  <th className="px-4 py-2 text-left">Name</th>
-                  <th className="px-4 py-2 text-right">Price</th>
-                  <th className="px-4 py-2 text-right">Stock</th>
-                  <th className="px-4 py-2 text-center">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {parts.map((part) => (
-                  <tr key={part.id} className="border-t">
-                    <td className="px-4 py-2 font-mono text-sm">{part.sku}</td>
-                    <td className="px-4 py-2">{part.name}</td>
-                    <td className="px-4 py-2 text-right">
-                      ${(part.price_cents / 100).toFixed(2)}
-                    </td>
-                    <td className="px-4 py-2 text-right">{part.stock_count}</td>
-                    <td className="px-4 py-2 text-center">
-                      <input
-                        type="number"
-                        value={part.stock_count}
-                        onChange={(e) =>
-                          updateStock(part.id, parseInt(e.target.value))
-                        }
-                        className="w-16 border rounded px-2 py-1 text-center"
-                      />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <div>
-          <h2 className="text-2xl font-bold mb-4">Services</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {services.map((service) => (
-              <div key={service.id} className="border rounded-lg p-4">
-                <p className="font-semibold">{service.name}</p>
-                <p className="text-sm text-muted">{service.sku}</p>
-                <p className="text-lg font-bold mt-2">
-                  ${(service.price_cents / 100).toFixed(2)}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
+    <AdminBoard
+      adminEmail={profile.email || user.email || 'admin@irepairtechnologies.com'}
+      contactSubmissions={(contactRes.data ?? []) as ContactSubmission[]}
+      customers={(customersRes.data ?? []) as Profile[]}
+      orders={(ordersRes.data ?? []) as Order[]}
+      parts={(partsRes.data ?? []) as InventoryPart[]}
+      services={(servicesRes.data ?? []) as RepairService[]}
+    />
   );
 }

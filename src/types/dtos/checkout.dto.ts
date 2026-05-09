@@ -19,6 +19,9 @@ export const checkoutItemSchema = z.object({
 export const checkoutRequestSchema = z.object({
   items: z.array(checkoutItemSchema).min(1, 'At least one item is required'),
   email: z.string().email('Valid email is required'),
+  acceptedTerms: z.literal(true, {
+    errorMap: () => ({ message: 'Purchasing terms must be accepted before checkout' }),
+  }),
 })
 
 // =========================================
@@ -31,7 +34,7 @@ export type CheckoutRequest = z.infer<typeof checkoutRequestSchema>
 
 export type CheckoutResponse = {
   url: string
-  sessionId: string
+  orderId: string
 }
 
 export type CheckoutError = {

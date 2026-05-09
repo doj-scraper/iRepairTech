@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { serverConfig } from '@/lib/config';
 
 /**
  * Service-role Supabase client.
@@ -6,6 +7,6 @@ import { createClient } from '@supabase/supabase-js';
  * Never import this in client components or expose to the browser.
  */
 export const supabaseService = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
+  serverConfig.NEXT_PUBLIC_SUPABASE_URL,
+  serverConfig.SUPABASE_SERVICE_ROLE_KEY,
 );

@@ -42,5 +42,17 @@ tsconfig.tsbuildinfo
 
 # Documentation (except README and ARCHITECTURE)
 *.md
+!AGENTS.md
 !README.md
 !ARCHITECTURE.md
+!docs/*.md
+!docs/**/*.md
+
+# NeuroSync — auto-generated / private (do not commit)
+.neurosync/.context-key
+.neurosync/store.json
+.neurosync/rules/
+.neurosync/agent-rules.md
+.agent-mem/
+.agent/skills/
+.copilot-specs-cache/

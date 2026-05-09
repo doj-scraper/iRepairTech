@@ -4,17 +4,17 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const badgeVariants = cva(
-  "inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+  "inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] transition-[background-color,border-color,color,transform] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
   {
     variants: {
       variant: {
-        default: "bg-primary/10 text-primary border border-primary/20",
-        secondary: "bg-secondary text-secondary-foreground border border-border/60",
-        destructive: "bg-destructive/10 text-destructive border border-destructive/20",
-        outline: "border border-border text-foreground bg-transparent",
-        success: "bg-success/10 text-success border border-success/20",
-        warning: "bg-warning/10 text-warning border border-warning/25",
-        accent: "bg-line-accent/20 text-foreground border border-line-accent/40",
+        default: "border-primary/15 bg-primary/10 text-primary",
+        secondary: "border-border/70 bg-secondary text-secondary-foreground",
+        destructive: "border-destructive/20 bg-destructive/10 text-destructive",
+        outline: "border-border text-foreground bg-transparent",
+        success: "border-success/20 bg-success/10 text-success",
+        warning: "border-warning/25 bg-warning/15 text-primary",
+        accent: "border-hairline/50 bg-hairline/15 text-primary",
       },
     },
     defaultVariants: {

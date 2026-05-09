@@ -28,6 +28,7 @@ export async function processQueue() {
             .single();
 
           if (order) {
+            await supabase.rpc('release_inventory_for_order', { p_order_id: order.id });
             await supabase.rpc('transition_order_state', { p_order_id: order.id, p_next_state: 'expired' });
           }
         }
@@ -36,7 +37,16 @@ export async function processQueue() {
         const orderId = charge?.metadata?.order_id;
 
         if (orderId) {
+          await supabase.rpc('release_inventory_for_order', { p_order_id: orderId });
           await supabase.rpc('transition_order_state', { p_order_id: orderId, p_next_state: 'refunded' });
+        }
+      } else if (event.type === 'payment_intent.payment_failed') {
+        const paymentIntent = event.payload?.data?.object;
+        const orderId = paymentIntent?.metadata?.order_id;
+
+        if (orderId) {
+          await supabase.rpc('release_inventory_for_order', { p_order_id: orderId });
+          await supabase.rpc('transition_order_state', { p_order_id: orderId, p_next_state: 'failed' });
         }
       }
 
@@ -58,4 +68,3 @@ export async function processQueue() {
     }
   }
 }
-
