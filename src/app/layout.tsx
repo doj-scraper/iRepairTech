@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'iRepair Technologies | Wholesale Cell Phone Repair Parts',
     description:
-      'Houston wholesale parts template with premium operations-focused merchandising, checkout, and customer account flows.',
+      'Premium wholesale cellphone repair parts for professional repair shops. Houston-stocked inventory with trade account access, Stripe checkout, and operational dispatch workflows.',
     type: 'website',
   },
 };

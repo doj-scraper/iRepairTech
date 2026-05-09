@@ -7,6 +7,7 @@ import { Footer } from '@/components/Footer';
 import { Header } from '@/components/Header';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -310,17 +311,17 @@ export default function CheckoutPage() {
                     />
                   </div>
 
-                  <label className="flex items-start gap-3 rounded-[1.4rem] border border-hairline/70 bg-secondary/35 px-4 py-4">
-                    <input
+                  <div className="flex items-start gap-3 rounded-[1.4rem] border border-hairline/70 bg-secondary/35 px-4 py-4">
+                    <Checkbox
+                      id="accept-terms"
                       checked={acceptedTerms}
-                      className="mt-1 h-4 w-4 rounded border-hairline bg-background accent-[color:var(--accent)]"
-                      onChange={(event) => setAcceptedTerms(event.target.checked)}
-                      type="checkbox"
+                      onCheckedChange={(checked) => setAcceptedTerms(checked === true)}
+                      className="mt-0.5"
                     />
-                    <span className="text-sm text-muted-foreground">
+                    <Label htmlFor="accept-terms" className="cursor-pointer text-sm text-muted-foreground">
                       I accept the current wholesale purchasing terms, MOQ requirements, and fulfillment conditions for this order batch.
-                    </span>
-                  </label>
+                    </Label>
+                  </div>
 
                   {error ? (
                     <div className="rounded-2xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">

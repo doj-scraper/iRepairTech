@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Header } from "@/components/Header";
@@ -45,7 +44,7 @@ export default function ContactPage() {
     <div className="flex min-h-screen flex-col">
       <Header />
       
-      <main className="flex-1 py-12">
+      <main id="main-content" className="flex-1 py-12">
         <div className="container max-w-2xl">
           <div className="mb-8">
             <h1 className="mb-2 text-4xl font-display font-bold">Contact Us</h1>
@@ -54,43 +53,47 @@ export default function ContactPage() {
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6 border border-border bg-card p-8 shadow-card">
-            <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
-              <Input id="name" name="name" required />
-            </div>
+          <div className="shell-frame">
+            <div className="shell-core p-8">
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Name</Label>
+                  <Input id="name" name="name" required />
+                </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" name="email" type="email" required />
-            </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input id="email" name="email" type="email" required />
+                </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="subject">Subject</Label>
-              <input type="hidden" name="subject" value={subject} />
-              <Select name="subject" required value={subject} onValueChange={setSubject}>
-                <SelectTrigger id="subject">
-                  <SelectValue placeholder="Select a subject" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="general">General Inquiry</SelectItem>
-                  <SelectItem value="request-part">Request a Part</SelectItem>
-                  <SelectItem value="order">Order Question</SelectItem>
-                  <SelectItem value="support">Technical Support</SelectItem>
-                  <SelectItem value="wholesale">Wholesale Pricing</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+                <div className="space-y-2">
+                  <Label htmlFor="subject">Subject</Label>
+                  <input type="hidden" name="subject" value={subject} />
+                  <Select name="subject" required value={subject} onValueChange={setSubject}>
+                    <SelectTrigger id="subject">
+                      <SelectValue placeholder="Select a subject" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="general">General Inquiry</SelectItem>
+                      <SelectItem value="request-part">Request a Part</SelectItem>
+                      <SelectItem value="order">Order Question</SelectItem>
+                      <SelectItem value="support">Technical Support</SelectItem>
+                      <SelectItem value="wholesale">Wholesale Pricing</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="message">Message</Label>
-              <Textarea id="message" name="message" rows={6} required />
-            </div>
+                <div className="space-y-2">
+                  <Label htmlFor="message">Message</Label>
+                  <Textarea id="message" name="message" rows={6} required />
+                </div>
 
-            <Button type="submit" disabled={loading} className="w-full gradient-primary text-white">
-              {loading ? 'Sending...' : 'Send Message'}
-            </Button>
-          </form>
+                <Button type="submit" disabled={loading} className="w-full gradient-primary text-white">
+                  {loading ? 'Sending...' : 'Send Message'}
+                </Button>
+              </form>
+            </div>
+          </div>
         </div>
       </main>
 

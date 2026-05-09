@@ -15,8 +15,6 @@ import { createClient } from '@/lib/supabase/server';
 
 export const dynamic = 'force-dynamic';
 
-export const dynamic = 'force-dynamic';
-
 export default async function DashboardPage() {
   const supabase = createClient();
   const {
@@ -99,7 +97,7 @@ export default async function DashboardPage() {
                   <div className="flex items-start gap-3 rounded-[1.4rem] border border-white/10 bg-white/5 px-4 py-4">
                     <ShieldCheck className="mt-0.5 h-5 w-5 text-primary-foreground/80" />
                     <p className="text-sm text-primary-foreground/80">
-                      Dashboard access is now protected by middleware so account history stays behind authenticated routes.
+                      Your account history, order tracking, and purchasing records are securely linked to your trade login.
                     </p>
                   </div>
                 </div>
