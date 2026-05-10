@@ -56,7 +56,7 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
                   Your order is now in the system and ready for fulfillment flow.
                 </h1>
                 <p className="max-w-2xl text-base text-muted-foreground md:text-lg">
-                  The success state now feels like part of the same branded business: verified, inventory-aware, and connected to the buyer dashboard.
+                  Your order has been confirmed and is visible in your dashboard. Our trade team will review stock allocation and prepare fulfillment.
                 </p>
                 <div className="grid gap-3 sm:grid-cols-2">
                   {[

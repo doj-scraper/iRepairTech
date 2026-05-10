@@ -24,7 +24,7 @@ export default async function AdminPage() {
 
   const { data: profileData, error: profileError } = await supabase
     .from('profiles')
-    .select('*')
+    .select('id, role')
     .eq('id', user.id)
     .single();
 
@@ -39,11 +39,11 @@ export default async function AdminPage() {
   }
 
   const [partsRes, servicesRes, ordersRes, customersRes, contactRes] = await Promise.all([
-    supabaseService.from('inventory_parts').select('*').order('stock_count', { ascending: true }),
-    supabaseService.from('repair_services').select('*').order('name', { ascending: true }),
-    supabaseService.from('orders').select('*').order('created_at', { ascending: false }).limit(8),
-    supabaseService.from('profiles').select('*').eq('role', 'customer').order('created_at', { ascending: false }).limit(6),
-    supabaseService.from('contact_submissions').select('*').order('created_at', { ascending: false }).limit(6),
+    supabaseService.from('inventory_parts').select('id, sku, name, description, image_url, price_cents, stock_count, moq, is_active, created_at').order('stock_count', { ascending: true }),
+    supabaseService.from('repair_services').select('id, sku, name, description, image_url, price_cents, estimated_hours, is_active, created_at').order('name', { ascending: true }),
+    supabaseService.from('orders').select('id, user_id, status, total_cents, created_at, updated_at').order('created_at', { ascending: false }).limit(8),
+    supabaseService.from('profiles').select('id, email, role, created_at').eq('role', 'customer').order('created_at', { ascending: false }).limit(6),
+    supabaseService.from('contact_submissions').select('id, name, email, phone, subject, message, created_at').order('created_at', { ascending: false }).limit(6),
   ]);
 
   if (partsRes.error) {

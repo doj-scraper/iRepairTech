@@ -206,7 +206,7 @@ export default function CheckoutPage() {
                   Confirm your procurement batch before Stripe handoff.
                 </h1>
                 <p className="max-w-2xl text-base text-muted-foreground md:text-lg">
-                  This template now treats checkout like a wholesale workflow: live-authoritative pricing, inventory-aware parts, and explicit purchasing-term capture before payment.
+                  Pricing is re-verified from live inventory before each order is submitted. Review your batch, confirm your contact details, and accept purchasing terms before Stripe handoff.
                 </p>
                 <div className="grid gap-3 sm:grid-cols-3">
                   {[

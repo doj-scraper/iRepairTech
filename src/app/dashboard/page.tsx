@@ -29,8 +29,8 @@ export default async function DashboardPage() {
     { data: profile, error: profileError },
     { data: orders, error: ordersError },
   ] = await Promise.all([
-    supabase.from('profiles').select('*').eq('id', user.id).single(),
-    supabase.from('orders').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
+    supabase.from('profiles').select('id, email, role, created_at').eq('id', user.id).single(),
+    supabase.from('orders').select('id, status, total_cents, accepted_terms, accepted_terms_at, created_at, updated_at').eq('user_id', user.id).order('created_at', { ascending: false }),
   ]);
 
   if (profileError) {

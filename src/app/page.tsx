@@ -10,29 +10,27 @@ import { Badge } from "@/components/ui/badge";
 
 const operatingSignals = [
   "Houston-stocked screens, batteries, and assemblies",
-  "Wholesale pricing and MOQ cues built into the buying flow",
-  "Account and operations surfaces for repeat-buyer continuity",
+  "Volume pricing and MOQ tiers for professional repair shops",
+  "Trade account portal with full order history and re-ordering",
 ];
 
-const templateAdvantages = [
+const whyIRepair = [
   {
-    title: "Merchandising That Sells",
+    title: "Thousands of SKUs In Stock",
     description:
-      "The product card system is built to feel machined, premium, and bulk-order ready, not generic.",
+      "Screens, batteries, charging ports, cameras, and full assemblies for all major brands — ready to ship same day from Houston.",
   },
   {
-    title: "Operational Trust Built In",
+    title: "Trade Pricing for Repair Shops",
     description:
-      "Dispatch windows, MOQ cues, support lines, and account access make the storefront feel like a real business.",
+      "Wholesale tiers, MOQ guidance, and volume discounts built for repair professionals running real operations, not one-off buyers.",
   },
   {
-    title: "Portal + Admin Story",
+    title: "Your Account, Your History",
     description:
-      "Customer history and admin management surfaces help buyers imagine running the business, not just browsing it.",
+      "Order history, repeat purchasing, and account management built to keep pace with a high-volume repair business.",
   },
 ];
-
-export const dynamic = 'force-dynamic';
 
 export default function HomePage() {
   return (
@@ -49,16 +47,15 @@ export default function HomePage() {
                 <div className="relative z-10 space-y-8">
                   <div className="space-y-5">
                     <span className="eyebrow border-white/10 bg-white/5 text-white/80">
-                      Houston wholesale template
+                      Houston wholesale supply
                     </span>
                     <div className="space-y-4">
                         <h1 className="max-w-3xl font-display text-5xl font-semibold leading-[0.96] tracking-[-0.06em] text-white md:text-6xl lg:text-7xl">
-                          Wholesale parts UI that feels like a real operation.
+                          Genuine repair parts. Trade pricing. Ships from Houston.
                         </h1>
                         <p className="max-w-2xl text-lg leading-8 text-white/78 md:text-xl">
-                          iRepair Technologies blends merchandised product cards, trade-account workflows,
-                          and industrial credibility into a wholesale storefront built for cellphone repair
-                          parts buyers.
+                          iRepair Technologies supplies professional repair shops with OEM-grade screens,
+                          batteries, and components — stocked in Houston and priced for volume buyers.
                         </p>
                     </div>
                   </div>
@@ -159,13 +156,13 @@ export default function HomePage() {
         <section className="section-space px-4 pt-0">
           <div className="container space-y-10">
             <SectionHeading
-              eyebrow="Business positioning"
-              title="Designed to support the whole operation."
-              description="The storefront, account area, and admin board all reinforce the same story: this is a wholesale business with real inventory, repeat customers, and fulfillment discipline."
+              eyebrow="Why iRepair"
+              title="Everything a repair shop needs, in one place."
+              description="From single-unit sourcing to bulk procurement — iRepair Technologies gives professional repair shops the inventory depth, pricing structure, and account tools to run a serious operation."
             />
 
             <div className="grid gap-5 lg:grid-cols-3">
-              {templateAdvantages.map((item) => (
+              {whyIRepair.map((item) => (
                 <div key={item.title} className="shell-frame">
                   <div className="shell-core h-full p-6">
                     <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">Operational advantage</p>
@@ -187,14 +184,15 @@ export default function HomePage() {
                 <BrandMark href="/" />
                 <div className="mt-8 space-y-4">
                   <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
-                    What buyers will recognize
+                    Trusted by repair shops across Texas
                   </p>
                   <h2 className="font-display text-4xl font-semibold tracking-[-0.05em] text-primary">
-                    Brand signals that make the template feel acquirable.
+                    Stocked, priced, and ready for professional volume.
                   </h2>
                     <p className="text-base leading-8 text-muted-foreground">
-                      The goal is not to look fictional. The goal is to feel like an established Houston
-                      supplier with the inventory depth, trade workflow, and trust markers buyers expect.
+                      iRepair Technologies has supplied Houston-area repair shops for years with the
+                      parts, pricing tiers, and account tools that keep businesses running without
+                      supply chain surprises.
                     </p>
                 </div>
               </div>
@@ -202,13 +200,13 @@ export default function HomePage() {
 
             <div className="grid gap-4 sm:grid-cols-2">
               {[
-                ['Wordmark-first brand', 'A believable company name and supporting operational badge system.'],
-                ['Merch cards with teeth', 'Stock, MOQ, and pricing hierarchy built to help bulk buyers scan fast.'],
-                ['Customer portal story', 'Order history, profile stats, and repeat-buyer trust cues are visible.'],
-                ['Admin board credibility', 'Inventory, orders, and account management feel like a real operations panel.'],
+                ['OEM-grade screens', 'iPhone, Samsung, and Android displays — INCELL and OLED options with warranty coverage.'],
+                ['Batteries & power', 'Tested capacity batteries for all major models, packaged for bulk storage and shop use.'],
+                ['Charging & ports', 'Lightning, USB-C, and flex cable assemblies stocked for fast turnaround on common repairs.'],
+                ['Trade account perks', 'Volume pricing unlocks automatically. Order history, reordering, and net terms available for qualified shops.'],
               ].map(([title, description]) => (
                 <div key={title} className="rounded-[1.75rem] border border-border/70 bg-card p-6 shadow-card">
-                  <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">Signal</p>
+                  <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">Category</p>
                   <h3 className="mt-3 font-display text-2xl font-semibold tracking-[-0.05em] text-primary">
                     {title}
                   </h3>

@@ -135,6 +135,29 @@ CREATE TYPE order_status AS ENUM (
 );
 ```
 
+## Rendering Strategy
+
+### Page Rendering Modes
+| Route | Mode | Reason |
+|-------|------|--------|
+| `/` | ○ Static (SSG) | No dynamic data — served from CDN edge |
+| `/shop/catalog` | ƒ Dynamic (SSR) | Fetches live inventory from Supabase per request |
+| `/dashboard` | ƒ Dynamic (SSR) | Auth-gated, user-specific order history |
+| `/admin` | ƒ Dynamic (SSR) | Auth-gated, admin-only data |
+| `/success` | ƒ Dynamic (SSR) | Stripe session lookup per request |
+| `/checkout`, `/contact`, `/error` | ○ Static (SSG) | Client-side interactivity only |
+
+### Catalog Page — Server/Client Split
+`/shop/catalog` uses a two-file pattern to enable SSR with interactive cart:
+
+- **`page.tsx`** (Server Component) — Fetches parts and services from Supabase at request time using the server Supabase client. Maps raw DB rows through the semantic projection layer. Passes typed data to the client shell.
+- **`CatalogClient.tsx`** (Client Component) — Receives pre-fetched data as props. Handles all interactive behavior: `useCart` hook, add-to-cart callbacks, UI state. No data fetching.
+
+This eliminates the loading skeleton for first-time visitors and makes catalog products indexable by search engines.
+
+### Supabase Query Discipline
+All Supabase queries use explicit column selects rather than `select('*')` to minimise payload size. Column lists match the TypeScript types in `src/lib/database.types.ts`.
+
 ## Deployment
 
 ### Vercel (Recommended)
