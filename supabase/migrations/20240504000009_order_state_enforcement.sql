@@ -3,16 +3,6 @@
 -- =========================================
 -- Required for: enforced state machine, audit trail, no invalid transitions
 
--- 1. Extend the existing enum with new states
--- NOTE: PostgreSQL doesn't support removing enum values, only adding
-ALTER TYPE order_status ADD VALUE 'awaiting_device';
-ALTER TYPE order_status ADD VALUE 'device_received';
-ALTER TYPE order_status ADD VALUE 'in_repair';
-ALTER TYPE order_status ADD VALUE 'qa';
-ALTER TYPE order_status ADD VALUE 'shipped';
-ALTER TYPE order_status ADD VALUE 'completed';
-ALTER TYPE order_status ADD VALUE 'failed';
-
 -- 2. Transition rules table (valid state graph)
 CREATE TABLE IF NOT EXISTS public.order_state_transitions (
   from_state order_status NOT NULL,

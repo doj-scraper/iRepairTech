@@ -203,16 +203,19 @@ for update
 using (id = auth.uid())
 with check (id = auth.uid() and role = 'customer');
 
+drop policy if exists user_insert_profile on public.profiles;
 create policy "user_insert_profile"
 on public.profiles
 for insert
 with check (auth.uid() = id and role = 'customer');
 
+drop policy if exists user_read_profile on public.profiles;
 create policy "user_read_profile"
 on public.profiles
 for select
 using (auth.uid() = id);
 
+drop policy if exists admin_read_order_state_transitions on public.order_state_transitions;
 create policy "admin_read_order_state_transitions"
 on public.order_state_transitions
 for select
@@ -225,6 +228,7 @@ using (
   )
 );
 
+drop policy if exists admin_read_order_state_history on public.order_state_history;
 create policy "admin_read_order_state_history"
 on public.order_state_history
 for select
@@ -237,6 +241,7 @@ using (
   )
 );
 
+drop policy if exists user_read_own_order_state_history on public.order_state_history;
 create policy "user_read_own_order_state_history"
 on public.order_state_history
 for select
