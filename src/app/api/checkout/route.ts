@@ -4,6 +4,7 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { supabaseService } from '@/lib/supabase/service';
 import { stripe } from '@/lib/stripe/client';
 import { publicConfig } from '@/lib/config';
+import { logger } from '@/lib/logger';
 import type { Database } from '@/lib/database.types';
 import { checkoutRequestSchema } from '@/types/dtos/checkout.dto';
 import type { CheckoutItem } from '@/types/dtos/checkout.dto';
@@ -44,6 +45,12 @@ async function cleanupCheckoutDraft(orderId?: string, sessionId?: string | null)
 }
 
 export async function POST(req: Request) {
+  const startTime = Date.now();
+  const wideEvent: Record<string, unknown> = {
+    method: 'POST',
+    path: '/api/checkout',
+  };
+
   let orderId: string | null = null;
   let createdSessionId: string | null = null;
 
@@ -71,10 +78,14 @@ export async function POST(req: Request) {
       data: { user },
     } = await supabase.auth.getUser();
 
+    wideEvent.user_id = user?.id ?? 'guest';
+
     const body = await req.json();
     const parsed = checkoutRequestSchema.safeParse(body);
 
     if (!parsed.success) {
+      wideEvent.outcome = 'validation_error';
+      wideEvent.status_code = 400;
       return NextResponse.json(
         { error: 'Invalid request', details: parsed.error.flatten().fieldErrors },
         { status: 400 }
@@ -82,6 +93,8 @@ export async function POST(req: Request) {
     }
 
     const { items, email } = parsed.data;
+    wideEvent.item_count = items.length;
+    wideEvent.customer_email = email;
 
     // 1. Fetch authoritative prices
     const partIds = items.filter((i: CheckoutItem) => i.type === 'part').map((i: CheckoutItem) => i.id);
@@ -144,6 +157,7 @@ export async function POST(req: Request) {
       (sum, item) => sum + item.price_data.unit_amount * item.quantity,
       0
     );
+    wideEvent.total_cents = total_cents;
 
     // 4. Create a draft order
     const { data: order, error: orderError } = await supabaseService
@@ -162,6 +176,7 @@ export async function POST(req: Request) {
 
     if (orderError || !order) throw orderError || new Error('Failed to create order');
     orderId = order.id;
+    wideEvent.order_id = orderId;
 
     // 5. Create order items
     const partItems = items
@@ -188,6 +203,9 @@ export async function POST(req: Request) {
           price_cents: product.price_cents
         };
       });
+
+    wideEvent.part_count = partItems.length;
+    wideEvent.service_count = serviceItems.length;
 
     if (partItems.length > 0) {
       const { error: itemsError } = await supabaseService
@@ -232,6 +250,7 @@ export async function POST(req: Request) {
     }
 
     createdSessionId = session.id;
+    wideEvent.stripe_session_id = createdSessionId;
 
     // 8. Attach session to order
     const { error: updateError } = await supabaseService
@@ -241,15 +260,24 @@ export async function POST(req: Request) {
 
     if (updateError) throw updateError;
 
+    wideEvent.outcome = 'success';
+    wideEvent.status_code = 200;
     return NextResponse.json({ url: session.url, orderId: order.id });
   } catch (error) {
+    wideEvent.outcome = 'error';
+    wideEvent.status_code = 400;
+    wideEvent.error_type = (error as Error).name;
+    wideEvent.error_message = (error as Error).message;
+
     if (orderId) {
       await cleanupCheckoutDraft(orderId, createdSessionId);
     }
-    console.error('Checkout error:', error);
     return NextResponse.json(
       { error: String(error) },
       { status: 400 }
     );
+  } finally {
+    wideEvent.duration_ms = Date.now() - startTime;
+    logger.info(wideEvent);
   }
 }

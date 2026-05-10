@@ -11,9 +11,19 @@ interface StripeEventRecord {
   };
 }
 
+function workerLog(level: 'info' | 'error', event: Record<string, unknown>) {
+  const line = JSON.stringify({ level, service: 'irepair-worker', timestamp: new Date().toISOString(), ...event });
+  level === 'error' ? console.error(line) : console.log(line);
+}
+
 export async function finalizeOrder(event: StripeEventRecord) {
+  const startTime = Date.now();
+  const logCtx: Record<string, unknown> = { job: 'finalizeOrder' };
+
   const session = event.payload?.data?.object;
   const orderId = session?.metadata?.order_id;
+  logCtx.order_id = orderId;
+  logCtx.stripe_session_id = session?.id;
 
   if (!orderId) {
     throw new Error('ORDER_ID_MISSING');
@@ -30,7 +40,9 @@ export async function finalizeOrder(event: StripeEventRecord) {
   }
 
   if (order?.status === 'paid') {
-    console.log(`Order ${orderId} already paid`);
+    logCtx.outcome = 'already_paid';
+    logCtx.duration_ms = Date.now() - startTime;
+    workerLog('info', logCtx);
     return;
   }
 
@@ -42,5 +54,7 @@ export async function finalizeOrder(event: StripeEventRecord) {
     throw finalizeError;
   }
 
-  console.log(`Order ${orderId} finalized`);
+  logCtx.outcome = 'finalized';
+  logCtx.duration_ms = Date.now() - startTime;
+  workerLog('info', logCtx);
 }
