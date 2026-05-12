@@ -1,5 +1,8 @@
+import 'server-only';
 import { createClient } from '@supabase/supabase-js';
-import { serverConfig } from '@/lib/config';
+import { getServerConfig } from '@/lib/config';
+
+const serverConfig = getServerConfig();
 
 /**
  * Service-role Supabase client.

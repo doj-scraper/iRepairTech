@@ -18,9 +18,21 @@ export const publicConfig = publicConfigSchema.parse({
   NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
 });
 
-export const serverConfig = serverConfigSchema.parse({
-  ...publicConfig,
-  SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
-  STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
-  STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
-});
+type ServerConfig = z.infer<typeof serverConfigSchema>;
+
+let cachedServerConfig: ServerConfig | null = null;
+
+export function getServerConfig(): ServerConfig {
+  if (cachedServerConfig) {
+    return cachedServerConfig;
+  }
+
+  cachedServerConfig = serverConfigSchema.parse({
+    ...publicConfig,
+    SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
+    STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
+    STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
+  });
+
+  return cachedServerConfig;
+}
