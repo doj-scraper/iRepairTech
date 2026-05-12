@@ -21,7 +21,7 @@ export const publicConfig = publicConfigSchema.parse({
 function createServerConfigProxy(): z.infer<typeof serverConfigSchema> {
   return new Proxy({} as z.infer<typeof serverConfigSchema>, {
     get() {
-      throw new Error('serverConfig is only available on the server.');
+      throw new Error('serverConfig is only available on the server. Use publicConfig for client-side environment variables.');
     },
   });
 }
