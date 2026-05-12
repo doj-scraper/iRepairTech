@@ -31,6 +31,27 @@ describe('config', () => {
       expect(publicConfig.NEXT_PUBLIC_SITE_URL).toBe(validEnv['NEXT_PUBLIC_SITE_URL']);
     });
 
+    it('does not require server-only env vars when loaded in the browser', async () => {
+      Object.entries({
+        NEXT_PUBLIC_SUPABASE_URL: validEnv['NEXT_PUBLIC_SUPABASE_URL'],
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: validEnv['NEXT_PUBLIC_SUPABASE_ANON_KEY'],
+        NEXT_PUBLIC_SITE_URL: validEnv['NEXT_PUBLIC_SITE_URL'],
+      }).forEach(([k, v]) => vi.stubEnv(k, v));
+
+      Object.defineProperty(globalThis, 'window', {
+        value: {},
+        configurable: true,
+      });
+
+      try {
+        const { publicConfig } = await import('@/lib/config');
+
+        expect(publicConfig.NEXT_PUBLIC_SUPABASE_URL).toBe(validEnv['NEXT_PUBLIC_SUPABASE_URL']);
+      } finally {
+        delete (globalThis as typeof globalThis & { window?: unknown }).window;
+      }
+    });
+
     it('throws when NEXT_PUBLIC_SUPABASE_URL is not a valid URL', async () => {
       Object.entries({ ...validEnv, NEXT_PUBLIC_SUPABASE_URL: 'not-a-url' }).forEach(([k, v]) =>
         vi.stubEnv(k, v),

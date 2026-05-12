@@ -18,9 +18,20 @@ export const publicConfig = publicConfigSchema.parse({
   NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
 });
 
-export const serverConfig = serverConfigSchema.parse({
-  ...publicConfig,
-  SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
-  STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
-  STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
-});
+function createServerConfigProxy(): z.infer<typeof serverConfigSchema> {
+  return new Proxy({} as z.infer<typeof serverConfigSchema>, {
+    get() {
+      throw new Error('serverConfig is only available on the server.');
+    },
+  });
+}
+
+export const serverConfig =
+  typeof window === 'undefined'
+    ? serverConfigSchema.parse({
+        ...publicConfig,
+        SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
+        STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
+        STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
+      })
+    : createServerConfigProxy();
