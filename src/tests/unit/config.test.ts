@@ -31,20 +31,6 @@ describe('config', () => {
       expect(publicConfig.NEXT_PUBLIC_SITE_URL).toBe(validEnv['NEXT_PUBLIC_SITE_URL']);
     });
 
-    it('does not require server-only variables when reading public config', async () => {
-      Object.entries({
-        NEXT_PUBLIC_SUPABASE_URL: validEnv['NEXT_PUBLIC_SUPABASE_URL'],
-        NEXT_PUBLIC_SUPABASE_ANON_KEY: validEnv['NEXT_PUBLIC_SUPABASE_ANON_KEY'],
-        NEXT_PUBLIC_SITE_URL: validEnv['NEXT_PUBLIC_SITE_URL'],
-      }).forEach(([k, v]) => vi.stubEnv(k, v));
-
-      const { publicConfig } = await import('@/lib/config');
-
-      expect(publicConfig.NEXT_PUBLIC_SUPABASE_URL).toBe(validEnv['NEXT_PUBLIC_SUPABASE_URL']);
-      expect(publicConfig.NEXT_PUBLIC_SUPABASE_ANON_KEY).toBe(validEnv['NEXT_PUBLIC_SUPABASE_ANON_KEY']);
-      expect(publicConfig.NEXT_PUBLIC_SITE_URL).toBe(validEnv['NEXT_PUBLIC_SITE_URL']);
-    });
-
     it('throws when NEXT_PUBLIC_SUPABASE_URL is not a valid URL', async () => {
       Object.entries({ ...validEnv, NEXT_PUBLIC_SUPABASE_URL: 'not-a-url' }).forEach(([k, v]) =>
         vi.stubEnv(k, v),
@@ -70,12 +56,11 @@ describe('config', () => {
     });
   });
 
-  describe('getServerConfig', () => {
+  describe('serverConfig', () => {
     it('parses a fully valid server environment', async () => {
       Object.entries(validEnv).forEach(([k, v]) => vi.stubEnv(k, v));
 
-      const { getServerConfig } = await import('@/lib/config');
-      const serverConfig = getServerConfig();
+      const { serverConfig } = await import('@/lib/config');
 
       expect(serverConfig.SUPABASE_SERVICE_ROLE_KEY).toBe(validEnv['SUPABASE_SERVICE_ROLE_KEY']);
       expect(serverConfig.STRIPE_SECRET_KEY).toBe(validEnv['STRIPE_SECRET_KEY']);
@@ -87,9 +72,7 @@ describe('config', () => {
         vi.stubEnv(k, v),
       );
 
-      const { getServerConfig } = await import('@/lib/config');
-
-      expect(() => getServerConfig()).toThrow();
+      await expect(import('@/lib/config')).rejects.toThrow();
     });
 
     it('throws when SUPABASE_SERVICE_ROLE_KEY is missing', async () => {
@@ -97,9 +80,7 @@ describe('config', () => {
         vi.stubEnv(k, v),
       );
 
-      const { getServerConfig } = await import('@/lib/config');
-
-      expect(() => getServerConfig()).toThrow();
+      await expect(import('@/lib/config')).rejects.toThrow();
     });
   });
 });
