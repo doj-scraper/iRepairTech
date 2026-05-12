@@ -1,4 +1,3 @@
-import 'server-only';
 import Stripe from 'stripe';
 import { getServerConfig } from '@/lib/config';
 
