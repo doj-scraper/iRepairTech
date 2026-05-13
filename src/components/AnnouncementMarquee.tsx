@@ -32,12 +32,10 @@ export function AnnouncementMarquee({ className }: AnnouncementMarqueeProps) {
     },
   ];
 
-  const loopedItems = [...items, ...items];
-
   return (
     <section className={cn('shell-frame overflow-hidden', className)}>
       <div className="shell-core overflow-hidden">
-        <div className="flex items-center justify-between gap-2 border-b border-border/70 bg-secondary/55 px-4 py-3">
+        <div className="flex items-center justify-between gap-2 border-b border-border/70 bg-secondary/50 px-4 py-3 sm:px-5">
           <div className="flex items-center gap-3">
             <span className="text-[10px] font-bold uppercase tracking-[0.28em] text-primary sm:text-[11px]">
               Bulletin
@@ -51,43 +49,48 @@ export function AnnouncementMarquee({ className }: AnnouncementMarqueeProps) {
           </span>
         </div>
 
-        <div className="relative overflow-hidden bg-background">
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-y-0 left-0 z-10 w-10 bg-gradient-to-r from-background to-transparent"
-          />
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-y-0 right-0 z-10 w-10 bg-gradient-to-l from-background to-transparent"
-          />
-
-          <div
-            className="flex w-max items-stretch gap-3 px-3 py-4 sm:px-4 animate-marquee motion-reduce:animate-none"
-            style={{ ['--marquee-duration' as string]: '28s' }}
-          >
-            {loopedItems.map((item, index) => {
+        <div className="bg-background p-3 sm:p-4">
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+            {items.map((item, index) => {
+              const isFeatured = index === items.length - 1;
               const content = (
-                <div className="flex min-w-max items-center gap-3 rounded-full border border-border/70 bg-card px-4 py-3 shadow-soft transition-smooth hover:-translate-y-0.5 hover:border-accent/25 hover:bg-secondary/35">
-                  <span className="inline-flex h-8 min-w-8 shrink-0 items-center justify-center rounded-full bg-primary px-2 text-[10px] font-bold uppercase tracking-[0.22em] text-primary-foreground">
-                    {String((index % items.length) + 1).padStart(2, '0')}
-                  </span>
-                  <span className="flex min-w-0 flex-col">
-                    <span className="text-xs font-semibold uppercase tracking-[0.2em] text-foreground">
-                      {item.label}
+                <div
+                  className={cn(
+                    'group h-full rounded-[1.4rem] border border-border/70 bg-card p-4 shadow-soft transition-smooth hover:-translate-y-0.5 hover:border-accent/25 hover:shadow-elegant',
+                    isFeatured && 'bg-gradient-to-br from-primary/8 via-card to-accent/8',
+                  )}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <span className="inline-flex h-8 min-w-8 shrink-0 items-center justify-center rounded-full bg-primary px-2 text-[10px] font-bold uppercase tracking-[0.22em] text-primary-foreground">
+                      {String(index + 1).padStart(2, '0')}
                     </span>
+                    <span className={cn(
+                      'rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em]',
+                      isFeatured ? 'border-accent/20 bg-accent/10 text-accent' : 'border-border/70 bg-secondary/70 text-muted-foreground',
+                    )}>
+                      {isFeatured ? 'Live' : 'Update'}
+                    </span>
+                  </div>
+
+                  <div className="mt-4 space-y-2">
+                    <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-foreground sm:text-[0.8rem]">
+                      {item.label}
+                    </h3>
                     {item.detail ? (
-                      <span className="text-[11px] text-muted-foreground">{item.detail}</span>
+                      <p className="text-sm leading-6 text-muted-foreground">
+                        {item.detail}
+                      </p>
                     ) : null}
-                  </span>
+                  </div>
                 </div>
               );
 
               return item.href ? (
-                <Link key={`${item.label}-${index}`} href={item.href} className="shrink-0">
+                <Link key={`${item.label}-${index}`} href={item.href} className="link-reset block h-full text-inherit">
                   {content}
                 </Link>
               ) : (
-                <div key={`${item.label}-${index}`} className="shrink-0">
+                <div key={`${item.label}-${index}`} className="h-full">
                   {content}
                 </div>
               );
