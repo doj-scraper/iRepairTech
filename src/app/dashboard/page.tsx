@@ -53,7 +53,7 @@ export default async function DashboardPage() {
       <main id="main-content" className="px-4 py-8 md:px-6 md:py-12">
         <div className="container space-y-8">
           <section className="shell-frame overflow-hidden">
-            <div className="shell-core grid gap-8 px-6 py-8 md:grid-cols-[1.15fr_0.85fr] md:px-10 md:py-12">
+            <div className="shell-core grid gap-8 px-5 py-6 sm:px-6 sm:py-8 md:grid-cols-[1.15fr_0.85fr] md:px-10 md:py-12">
               <div className="space-y-6">
                 <Badge variant="accent">Customer history</Badge>
                 <SectionHeading
@@ -76,9 +76,9 @@ export default async function DashboardPage() {
                 </div>
               </div>
 
-              <div className="rounded-[2rem] border border-hairline/80 bg-gradient-to-br from-primary/95 via-primary to-accent/70 p-6 text-primary-foreground shadow-glow">
+              <div className="rounded-[1.5rem] border border-hairline/80 bg-gradient-to-br from-primary/95 via-primary to-accent/70 p-5 text-primary-foreground shadow-glow sm:rounded-[2rem] sm:p-6">
                 <p className="text-xs uppercase tracking-[0.22em] text-primary-foreground/70">Buyer profile</p>
-                <p className="mt-3 font-display text-3xl">{customerProfile.email}</p>
+                <p className="mt-3 break-words font-display text-2xl sm:text-3xl">{customerProfile.email}</p>
                 <div className="mt-8 space-y-4">
                   <div>
                     <p className="text-xs uppercase tracking-[0.18em] text-primary-foreground/60">Member since</p>
@@ -152,7 +152,7 @@ export default async function DashboardPage() {
                 <CardContent className="space-y-4">
                   <div className="rounded-[1.6rem] border border-hairline/70 bg-secondary/35 p-5">
                     <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Catalog refresh</p>
-                    <h2 className="mt-2 font-display text-2xl text-primary">Load another procurement batch.</h2>
+                    <h2 className="mt-2 section-title text-primary">Load another procurement batch.</h2>
                     <p className="mt-2 text-sm text-muted-foreground">
                       Return to the merchandised catalog and keep the customer journey inside the same premium-industrial system.
                     </p>

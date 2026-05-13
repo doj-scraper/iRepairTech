@@ -160,11 +160,9 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
                     <PriceDisplay cents={total} size="lg" />
                   </div>
 
-                  <Link href="/checkout" onClick={onClose} className="block">
-                    <Button className="w-full" size="lg">
-                      Proceed to Payment
-                    </Button>
-                  </Link>
+                  <Button asChild className="w-full" size="lg" onClick={onClose}>
+                    <Link href="/checkout">Proceed to Payment</Link>
+                  </Button>
 
                   <button
                     onClick={() => {

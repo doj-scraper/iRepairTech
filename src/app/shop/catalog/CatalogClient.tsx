@@ -59,9 +59,9 @@ export function CatalogClient({ parts, services }: CatalogClientProps) {
               title="No products available"
               description="Check back soon for new inventory and service listings."
               action={
-                <Link href="/">
-                  <Button>Return Home</Button>
-                </Link>
+                <Button asChild>
+                  <Link href="/">Return Home</Link>
+                </Button>
               }
             />
           ) : (

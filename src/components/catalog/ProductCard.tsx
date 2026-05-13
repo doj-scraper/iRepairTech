@@ -87,7 +87,7 @@ export function ProductCard({
                 <span className="text-[11px] uppercase tracking-[0.22em] text-white/70">
                   {sku ?? 'Trade sku'}
                 </span>
-                <p className="mt-2 max-w-[11rem] font-display text-2xl font-semibold tracking-[-0.05em]">
+                <p className="mt-2 max-w-[11rem] font-display text-2xl font-semibold leading-tight tracking-[-0.05em]">
                   {name}
                 </p>
               </div>
@@ -103,7 +103,7 @@ export function ProductCard({
             {sku ? <span className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">{sku}</span> : null}
           </div>
           <div>
-            <h3 className="font-display text-2xl font-semibold tracking-[-0.05em] text-primary">{name}</h3>
+            <h3 className="font-display text-2xl font-semibold leading-tight tracking-[-0.05em] text-primary">{name}</h3>
             {description ? (
               <p className="mt-2 line-clamp-3 text-sm leading-6 text-muted-foreground">{description}</p>
             ) : (
@@ -163,7 +163,7 @@ export function ProductCard({
                     <div className="flex h-full items-end bg-[radial-gradient(circle_at_top_left,rgba(184,138,59,0.34),transparent_34%),linear-gradient(135deg,rgba(255,255,255,0.1),rgba(255,255,255,0))] p-6 text-primary-foreground">
                       <div>
                         <p className="text-[11px] uppercase tracking-[0.22em] text-white/70">{sku ?? 'Trade sku'}</p>
-                        <p className="mt-2 font-display text-3xl font-semibold tracking-[-0.05em]">{name}</p>
+                        <p className="mt-2 font-display text-3xl font-semibold leading-tight tracking-[-0.05em]">{name}</p>
                       </div>
                     </div>
                   )}

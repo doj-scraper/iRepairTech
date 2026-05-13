@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { serverConfig } from '@/lib/config';
+import { serverConfig } from '@/lib/config/server';
 
 /**
  * Service-role Supabase client.

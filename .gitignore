@@ -56,3 +56,5 @@ tsconfig.tsbuildinfo
 .agent-mem/
 .agent/skills/
 .copilot-specs-cache/
+.vercel
+.env*.local

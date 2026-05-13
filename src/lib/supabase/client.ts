@@ -1,5 +1,5 @@
 import { createBrowserClient } from '@supabase/ssr';
-import { publicConfig } from '@/lib/config';
+import { publicConfig } from '@/lib/config/public';
 
 export function createClient() {
   return createBrowserClient(

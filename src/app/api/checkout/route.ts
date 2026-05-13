@@ -3,7 +3,7 @@ import { cookies } from 'next/headers';
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { supabaseService } from '@/lib/supabase/service';
 import { stripe } from '@/lib/stripe/client';
-import { publicConfig } from '@/lib/config';
+import { publicConfig } from '@/lib/config/public';
 import { logger } from '@/lib/logger';
 import type { Database } from '@/lib/database.types';
 import { checkoutRequestSchema } from '@/types/dtos/checkout.dto';

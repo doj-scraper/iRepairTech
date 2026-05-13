@@ -1,5 +1,9 @@
 # iRepair Project Notes
 
+## Runtime Config Fix
+
+May 12, 2026: The production error was caused by Zod validating server-only environment variables from a module that was also imported by client-side code, so those secrets were stripped in the browser and resolved to `undefined`. The fix was to split config validation into `src/lib/config/public.ts` for browser-safe values and `src/lib/config/server.ts` for secrets, then update imports so client bundles only reference public env vars.
+
 ## EC2 Instance
 
 | | |
@@ -39,7 +43,6 @@
 - `node_modules` and `.next` are excluded from rsync — deps are installed on EC2 via `pnpm install`
 - The app runs on port 3000 by default; ensure port 3000 is open in the `irepair-dev-sg` security group to access it
 - `.env.local` values are stored in the file itself (gitignored) — do not paste secrets into this file
-
 
 
 

@@ -50,6 +50,8 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ```
 
 > **Note:** `STRIPE_WEBHOOK_SECRET` must come from the Stripe CLI (`stripe listen`) or the Vercel dashboard webhook endpoint — it is not a static value.
+>
+> Public browser-safe values are validated in `src/lib/config/public.ts`. Server-only secrets are validated in `src/lib/config/server.ts` so they are never pulled into client bundles.
 
 ## Getting Started
 
@@ -112,7 +114,9 @@ pnpm start   # start production server
 │   │
 │   ├── lib/
 │   │   ├── logger.ts                   # Structured JSON logger (wide-event singleton)
-│   │   ├── config.ts                   # Validated public env vars
+│   │   ├── config/
+│   │   │   ├── public.ts               # Browser-safe env validation
+│   │   │   └── server.ts               # Server-only env validation
 │   │   ├── database.types.ts           # Auto-generated Supabase TypeScript types
 │   │   ├── formatters.ts               # Currency, date formatters
 │   │   ├── schema.ts                   # Shared Zod schemas (CartItem, etc.)

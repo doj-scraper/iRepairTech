@@ -47,16 +47,16 @@ export function Header() {
 
   return (
     <>
-      <header className="sticky top-4 z-40 px-4">
+      <header className="sticky top-2 z-40 px-3 sm:top-4 sm:px-4">
         <div className="container">
           <div className="shell-frame">
-            <div className="shell-core flex items-center justify-between gap-4 px-4 py-4 md:px-6">
+            <div className="shell-core flex items-center justify-between gap-3 px-4 py-3 sm:gap-4 sm:py-4 md:px-6 lg:px-7">
               <div className="flex min-w-0 items-center gap-4">
                 <Sheet>
                   <SheetTrigger asChild>
                     <button
                       type="button"
-                      className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-border/70 bg-background text-primary transition-smooth hover:border-accent/30 hover:bg-secondary/60 md:hidden"
+                      className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border/70 bg-background text-primary transition-smooth hover:border-accent/30 hover:bg-secondary/60 md:hidden"
                       aria-label="Open navigation"
                     >
                       <Menu className="h-5 w-5" strokeWidth={1.75} />
@@ -116,7 +116,7 @@ export function Header() {
                     key={n.to}
                     href={n.to}
                     className={cn(
-                      "rounded-full px-4 py-2.5 text-sm font-medium text-muted-foreground transition-smooth hover:bg-secondary/70 hover:text-primary",
+                      "rounded-full px-4 py-2.5 text-sm font-medium text-muted-foreground transition-smooth hover:bg-secondary/70 hover:text-primary lg:px-5 lg:py-3",
                       pathname === n.to && "bg-secondary text-primary shadow-soft",
                     )}
                   >
@@ -136,7 +136,7 @@ export function Header() {
               <div className="flex items-center gap-2">
                 <a
                   href="tel:+17135550199"
-                  className="hidden items-center gap-2 rounded-full border border-border/70 bg-background px-4 py-2 text-sm text-muted-foreground transition-smooth hover:border-accent/30 hover:text-primary lg:inline-flex"
+                  className="hidden items-center gap-2 rounded-full border border-border/70 bg-background px-4 py-2 text-sm text-muted-foreground transition-smooth hover:border-accent/30 hover:text-primary xl:inline-flex xl:px-5 xl:py-3"
                 >
                   <Phone className="h-4 w-4" strokeWidth={1.75} />
                   (713) 555-0199
@@ -144,7 +144,7 @@ export function Header() {
 
                 <button
                   onClick={() => setCartOpen(true)}
-                  className="relative inline-flex h-11 w-11 items-center justify-center rounded-full border border-border/70 bg-background text-muted-foreground transition-smooth hover:border-accent/30 hover:bg-secondary/70 hover:text-primary"
+                  className="relative inline-flex h-10 w-10 items-center justify-center rounded-full border border-border/70 bg-background text-muted-foreground transition-smooth hover:border-accent/30 hover:bg-secondary/70 hover:text-primary sm:h-11 sm:w-11"
                   aria-label={`Open cart, ${count} items`}
                 >
                   <ShoppingCart className="h-[18px] w-[18px]" strokeWidth={1.75} />

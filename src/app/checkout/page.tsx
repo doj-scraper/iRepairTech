@@ -199,13 +199,13 @@ export default function CheckoutPage() {
       <main id="main-content" className="px-4 py-8 md:px-6 md:py-12">
         <div className="container space-y-8">
           <section className="shell-frame overflow-hidden">
-            <div className="shell-core grid gap-8 px-6 py-8 md:grid-cols-[1.08fr_0.92fr] md:px-10 md:py-10">
+            <div className="shell-core grid gap-8 px-5 py-6 sm:px-6 sm:py-8 md:grid-cols-[1.08fr_0.92fr] md:px-10 md:py-10">
               <div className="space-y-5">
                 <Badge variant="accent">Checkout corridor</Badge>
-                <h1 className="font-display text-4xl font-semibold tracking-[-0.06em] text-primary md:text-6xl">
+                <h1 className="page-title text-primary md:text-6xl">
                   Confirm your procurement batch before Stripe handoff.
                 </h1>
-                <p className="max-w-2xl text-base text-muted-foreground md:text-lg">
+                <p className="max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base sm:leading-8 md:text-lg">
                   Pricing is re-verified from live inventory before each order is submitted. Review your batch, confirm your contact details, and accept purchasing terms before Stripe handoff.
                 </p>
                 <div className="grid gap-3 sm:grid-cols-3">
@@ -223,7 +223,7 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              <div className="rounded-[2rem] border border-hairline/80 bg-gradient-to-br from-primary/95 via-primary to-accent/75 p-6 text-primary-foreground shadow-glow">
+              <div className="rounded-[1.5rem] border border-hairline/80 bg-gradient-to-br from-primary/95 via-primary to-accent/75 p-5 text-primary-foreground shadow-glow sm:rounded-[2rem] sm:p-6">
                 <p className="text-xs uppercase tracking-[0.22em] text-primary-foreground/70">Order snapshot</p>
                 <div className="mt-6 grid gap-4 sm:grid-cols-3">
                   {[
@@ -246,11 +246,11 @@ export default function CheckoutPage() {
 
           <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
             <div className="shell-frame">
-              <div className="shell-core px-6 py-8 md:px-8 md:py-8">
+              <div className="shell-core px-5 py-6 sm:px-6 sm:py-8 md:px-8 md:py-8">
                 <div className="mb-6 flex items-center justify-between gap-3">
                   <div>
                     <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">Quoted batch</p>
-                    <h2 className="mt-2 font-display text-3xl text-primary">Order summary</h2>
+                    <h2 className="mt-2 section-title text-primary">Order summary</h2>
                   </div>
                   <Badge variant="outline">Live inventory pull</Badge>
                 </div>
@@ -260,7 +260,7 @@ export default function CheckoutPage() {
                     <p className="text-sm text-muted-foreground">Revalidating pricing and availability…</p>
                   ) : (
                     quotedItems.map((item) => (
-                      <div key={`${item.id}-${item.type}`} className="rounded-[1.6rem] border border-hairline/70 bg-secondary/35 p-5">
+                      <div key={`${item.id}-${item.type}`} className="rounded-[1.4rem] border border-hairline/70 bg-secondary/35 p-5 sm:rounded-[1.6rem]">
                         <div className="flex flex-wrap items-start justify-between gap-4">
                           <div className="space-y-2">
                             <div className="flex flex-wrap items-center gap-2">
@@ -281,7 +281,7 @@ export default function CheckoutPage() {
                   )}
                 </div>
 
-                <div className="mt-6 flex items-center justify-between rounded-[1.6rem] border border-hairline/80 bg-background/80 px-5 py-4">
+                <div className="mt-6 flex flex-col gap-3 rounded-[1.4rem] border border-hairline/80 bg-background/80 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
                   <span className="text-sm uppercase tracking-[0.18em] text-muted-foreground">Order total</span>
                   <PriceDisplay cents={quotedTotalCents} size="lg" />
                 </div>
@@ -289,10 +289,10 @@ export default function CheckoutPage() {
             </div>
 
             <div className="shell-frame">
-              <div className="shell-core px-6 py-8 md:px-8 md:py-8">
+              <div className="shell-core px-5 py-6 sm:px-6 sm:py-8 md:px-8 md:py-8">
                 <div className="mb-6 space-y-3">
                   <Badge variant="outline">Buyer details</Badge>
-                  <h2 className="font-display text-3xl text-primary">Confirm contact and terms.</h2>
+                  <h2 className="section-title text-primary">Confirm contact and terms.</h2>
                   <p className="text-sm text-muted-foreground">
                     The checkout request will reserve inventory, create a draft order, and then forward the customer to Stripe.
                   </p>

@@ -37,9 +37,9 @@ export function AnnouncementMarquee({ className }: AnnouncementMarqueeProps) {
   return (
     <section className={cn('shell-frame overflow-hidden', className)}>
       <div className="shell-core overflow-hidden">
-        <div className="flex items-center justify-between border-b border-border/70 bg-secondary/55 px-4 py-3">
+        <div className="flex items-center justify-between gap-2 border-b border-border/70 bg-secondary/55 px-4 py-3">
           <div className="flex items-center gap-3">
-            <span className="text-[10px] font-bold uppercase tracking-[0.28em] text-primary">
+            <span className="text-[10px] font-bold uppercase tracking-[0.28em] text-primary sm:text-[11px]">
               Bulletin
             </span>
             <span className="hidden text-[10px] uppercase tracking-[0.2em] text-muted-foreground sm:inline">
@@ -62,7 +62,7 @@ export function AnnouncementMarquee({ className }: AnnouncementMarqueeProps) {
           />
 
           <div
-            className="flex w-max items-stretch gap-3 px-4 py-4 animate-marquee motion-reduce:animate-none"
+            className="flex w-max items-stretch gap-3 px-3 py-4 sm:px-4 animate-marquee motion-reduce:animate-none"
             style={{ ['--marquee-duration' as string]: '28s' }}
           >
             {loopedItems.map((item, index) => {

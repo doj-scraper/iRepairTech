@@ -102,15 +102,15 @@ export function AuthScreen({ redirectTo }: AuthScreenProps) {
       <main id="main-content" className="flex-1 px-4 py-8 md:px-6 md:py-12">
         <div className="container grid gap-8 lg:grid-cols-[1.05fr_0.95fr]">
           <section className="shell-frame overflow-hidden">
-            <div className="shell-core relative flex h-full flex-col justify-between gap-8 px-6 py-8 md:px-10 md:py-10">
+            <div className="shell-core relative flex h-full flex-col justify-between gap-8 px-5 py-6 sm:px-6 sm:py-8 md:px-10 md:py-10">
               <div className="space-y-6">
                 <Badge variant="accent">Trade access</Badge>
                 <BrandMark />
                 <div className="space-y-4">
-                  <h1 className="font-display text-4xl font-semibold tracking-[-0.06em] text-primary md:text-6xl">
+                  <h1 className="page-title text-primary md:text-6xl">
                     Sign in to manage orders, quotes, and bench-ready inventory.
                   </h1>
-                  <p className="max-w-2xl text-base text-muted-foreground md:text-lg">
+                  <p className="max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base sm:leading-8 md:text-lg">
                     iRepair Technologies is positioned like a real Houston wholesale operation, and the account area now matches that standard with stronger trust, clearer access, and a smoother customer journey.
                   </p>
                 </div>
@@ -139,9 +139,9 @@ export function AuthScreen({ redirectTo }: AuthScreenProps) {
                     description: 'Dashboard and admin routes now honor authenticated access before rendering.',
                   },
                 ].map((item) => (
-                  <div key={item.title} className="rounded-[1.6rem] border border-hairline/70 bg-secondary/30 p-5">
+                  <div key={item.title} className="rounded-[1.4rem] border border-hairline/70 bg-secondary/30 p-5">
                     <item.icon className="h-5 w-5 text-accent" />
-                    <h2 className="mt-4 font-display text-xl text-primary">{item.title}</h2>
+                    <h2 className="mt-4 font-display text-lg text-primary sm:text-xl">{item.title}</h2>
                     <p className="mt-2 text-sm text-muted-foreground">{item.description}</p>
                   </div>
                 ))}
@@ -150,10 +150,10 @@ export function AuthScreen({ redirectTo }: AuthScreenProps) {
           </section>
 
           <section className="shell-frame">
-            <div className="shell-core px-6 py-8 md:px-10 md:py-10">
+            <div className="shell-core px-5 py-6 sm:px-6 sm:py-8 md:px-10 md:py-10">
               <div className="mb-8 space-y-3">
                 <Badge variant="outline">{isSignUp ? 'Create customer account' : 'Customer sign in'}</Badge>
-                <h2 className="font-display text-3xl text-primary md:text-4xl">
+                <h2 className="section-title text-primary">
                   {isSignUp ? 'Open a buyer account.' : 'Return to your operations view.'}
                 </h2>
                 <p className="text-sm text-muted-foreground">

@@ -44,17 +44,17 @@ export default function ContactPage() {
     <div className="flex min-h-screen flex-col">
       <Header />
       
-      <main id="main-content" className="flex-1 py-12">
+      <main id="main-content" className="flex-1 px-4 py-8 md:px-6 md:py-12">
         <div className="container max-w-2xl">
           <div className="mb-8">
-            <h1 className="mb-2 text-4xl font-display font-bold">Contact Us</h1>
-            <p className="text-muted-foreground">
+            <h1 className="page-title text-primary">Contact Us</h1>
+            <p className="mt-2 text-sm text-muted-foreground sm:text-base">
               Get in touch with our team. We typically respond within 24 hours.
             </p>
           </div>
 
           <div className="shell-frame">
-            <div className="shell-core p-8">
+            <div className="shell-core p-5 sm:p-6 md:p-8">
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-2">
                   <Label htmlFor="name">Name</Label>
