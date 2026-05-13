@@ -9,7 +9,6 @@ import { SectionHeading } from '@/components/brand/SectionHeading';
 import { OrderStatusBadge } from '@/components/orders/OrderStatusBadge';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
 import type { Order, Profile } from '@/lib/database.types';
 import { formatCurrency, formatDate, formatDateTime } from '@/lib/formatters';
@@ -149,11 +148,16 @@ export default async function DashboardPage() {
             />
           ) : (
             <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Order history</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
+              <div className="shell-frame">
+                <div className="shell-core space-y-4 px-5 py-6 sm:px-6 sm:py-8 md:px-8 md:py-8">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">Account activity</p>
+                      <h2 className="mt-2 section-title text-primary">Order history</h2>
+                    </div>
+                    <Badge variant="outline">Customer portal</Badge>
+                  </div>
+
                   {customerOrders.map((order) => (
                     <div key={order.id} className="rounded-[1.6rem] border border-hairline/70 bg-secondary/35 p-5">
                       <div className="flex flex-wrap items-start justify-between gap-4">
@@ -174,14 +178,16 @@ export default async function DashboardPage() {
                       </div>
                     </div>
                   ))}
-                </CardContent>
-              </Card>
+                </div>
+              </div>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Account actions</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
+              <div className="shell-frame">
+                <div className="shell-core space-y-4 px-5 py-6 sm:px-6 sm:py-8 md:px-8 md:py-8">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">Buyer tools</p>
+                    <h2 className="mt-2 section-title text-primary">Account actions</h2>
+                  </div>
+
                   <div className="rounded-[1.6rem] border border-hairline/70 bg-secondary/35 p-5">
                     <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Catalog refresh</p>
                     <h2 className="mt-2 section-title text-primary">Load another procurement batch.</h2>
@@ -202,8 +208,8 @@ export default async function DashboardPage() {
                       Customer accounts are provisioned with a profile record during sign-in or sign-up, which keeps history, roles, and dashboard continuity connected to Supabase.
                     </p>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </section>
           )}
         </div>

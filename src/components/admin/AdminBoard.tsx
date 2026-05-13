@@ -7,10 +7,7 @@ import {
   ArrowUpRight,
   Boxes,
   ClipboardList,
-  Mail,
   PackageCheck,
-  Users,
-  Wrench,
 } from 'lucide-react';
 import { Footer } from '@/components/Footer';
 import { Header } from '@/components/Header';
@@ -18,7 +15,6 @@ import { SectionHeading } from '@/components/brand/SectionHeading';
 import { OrderStatusBadge } from '@/components/orders/OrderStatusBadge';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import type {
   ContactSubmission,
@@ -223,14 +219,16 @@ export function AdminBoard({
             </div>
 
             <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <AlertTriangle className="h-5 w-5 text-accent" />
-                    Replenishment watchlist
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
+              <div className="shell-frame">
+                <div className="shell-core space-y-4 px-5 py-6 sm:px-6 sm:py-8 md:px-8 md:py-8">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">Inventory alerting</p>
+                      <h2 className="mt-2 section-title text-primary">Replenishment watchlist</h2>
+                    </div>
+                    <Badge variant="outline">Low-stock items</Badge>
+                  </div>
+
                   {watchlist.map((part) => (
                     <div key={part.id} className="rounded-2xl border border-hairline/70 bg-secondary/35 p-4">
                       <div className="flex items-start justify-between gap-3">
@@ -249,17 +247,19 @@ export function AdminBoard({
                       </p>
                     </div>
                   ))}
-                </CardContent>
-              </Card>
+                </div>
+              </div>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Wrench className="h-5 w-5 text-accent" />
-                    Service programs
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
+              <div className="shell-frame">
+                <div className="shell-core space-y-4 px-5 py-6 sm:px-6 sm:py-8 md:px-8 md:py-8">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">Repair offers</p>
+                      <h2 className="mt-2 section-title text-primary">Service programs</h2>
+                    </div>
+                    <Badge variant="outline">Active catalog</Badge>
+                  </div>
+
                   {services.map((service) => (
                     <div key={service.id} className="rounded-2xl border border-hairline/70 bg-secondary/35 p-4">
                       <div className="flex items-start justify-between gap-3">
@@ -276,20 +276,22 @@ export function AdminBoard({
                       </p>
                     </div>
                   ))}
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </div>
           </section>
 
           <section className="grid gap-6 xl:grid-cols-3">
-            <Card className="xl:col-span-2">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <ClipboardList className="h-5 w-5 text-accent" />
-                  Recent order flow
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
+            <div className="shell-frame xl:col-span-2">
+              <div className="shell-core space-y-4 px-5 py-6 sm:px-6 sm:py-8 md:px-8 md:py-8">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">Order motion</p>
+                    <h2 className="mt-2 section-title text-primary">Recent order flow</h2>
+                  </div>
+                  <Badge variant="outline">Latest 8 orders</Badge>
+                </div>
+
                 {orders.map((order) => (
                   <div
                     key={order.id}
@@ -310,38 +312,42 @@ export function AdminBoard({
                       <Link href="/dashboard" className="text-sm font-medium text-accent transition hover:text-primary">
                         Customer view
                       </Link>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
+                  ))}
+              </div>
+            </div>
 
             <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Users className="h-5 w-5 text-accent" />
-                    Customer accounts
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
+              <div className="shell-frame">
+                <div className="shell-core space-y-4 px-5 py-6 sm:px-6 sm:py-8 md:px-8 md:py-8">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">Customer base</p>
+                      <h2 className="mt-2 section-title text-primary">Customer accounts</h2>
+                    </div>
+                    <Badge variant="outline">Active buyers</Badge>
+                  </div>
+
                   {customers.map((customer) => (
                     <div key={customer.id} className="rounded-2xl border border-hairline/70 bg-secondary/35 p-4">
                       <p className="font-semibold text-primary">{customer.email}</p>
                       <p className="mt-1 text-sm text-muted-foreground">Joined {formatDate(customer.created_at)}</p>
                     </div>
                   ))}
-                </CardContent>
-              </Card>
+                </div>
+              </div>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Mail className="h-5 w-5 text-accent" />
-                    Contact queue
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
+              <div className="shell-frame">
+                <div className="shell-core space-y-4 px-5 py-6 sm:px-6 sm:py-8 md:px-8 md:py-8">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">Sales inbox</p>
+                      <h2 className="mt-2 section-title text-primary">Contact queue</h2>
+                    </div>
+                    <Badge variant="outline">Recent inquiries</Badge>
+                  </div>
+
                   {contactSubmissions.map((submission) => (
                     <div key={submission.id} className="rounded-2xl border border-hairline/70 bg-secondary/35 p-4">
                       <div className="flex items-start justify-between gap-3">
@@ -354,8 +360,8 @@ export function AdminBoard({
                       <p className="mt-3 line-clamp-3 text-sm text-muted-foreground">{submission.message}</p>
                     </div>
                   ))}
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </div>
           </section>
 

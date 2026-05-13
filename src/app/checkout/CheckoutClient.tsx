@@ -203,7 +203,7 @@ export function CheckoutClient() {
                 <Badge variant="accent">Checkout corridor</Badge>
                 <SectionHeading
                   title="Review the batch, confirm terms, and send the order to Stripe."
-                  description="Pricing is rechecked from live inventory before each order is submitted. The experience is built to feel like a real procurement desk, not a template checkout."
+                  description="Pricing is rechecked from live inventory before each order is submitted. The experience is built to feel like a real procurement desk for wholesale buyers."
                 />
                 <div className="grid gap-3 sm:grid-cols-3">
                   {[

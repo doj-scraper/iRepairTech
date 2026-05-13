@@ -19,11 +19,11 @@ export function AnnouncementMarquee({ className }: AnnouncementMarqueeProps) {
     },
     {
       label: 'Volume Pricing',
-      detail: 'Screen, battery, and assembly bundles available on request',
+      detail: 'Screen, battery, and assembly bundles available for repair shops',
     },
     {
       label: 'Repair Shop Ready',
-      detail: 'Template includes account, admin, Stripe, and Supabase wiring',
+      detail: 'Trade account history, reorder flow, and support in one portal',
     },
     {
       label: 'New Stock Run',

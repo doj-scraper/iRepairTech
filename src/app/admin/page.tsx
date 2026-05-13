@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { AdminBoard } from '@/components/admin/AdminBoard';
 import type {
@@ -11,6 +12,18 @@ import { supabaseService } from '@/lib/supabase/service';
 import { createClient } from '@/lib/supabase/server';
 
 export const dynamic = 'force-dynamic';
+export const metadata: Metadata = {
+  title: 'Admin | iRepair Technologies',
+  description:
+    'Internal operations board for iRepair Technologies inventory, orders, and customer contact queues.',
+  keywords: 'admin board, inventory management, wholesale operations, repair parts system',
+  openGraph: {
+    title: 'Admin | iRepair Technologies',
+    description:
+      'Operations board for inventory, orders, and customer support inside iRepair Technologies.',
+    type: 'website',
+  },
+};
 
 export default async function AdminPage() {
   const supabase = createClient();

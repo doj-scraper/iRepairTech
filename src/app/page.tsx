@@ -1,40 +1,65 @@
-import Link from "next/link";
-import Image from "next/image";
-import { AnnouncementMarquee } from "@/components/AnnouncementMarquee";
-import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
-import { Button } from "@/components/ui/button";
-import { BrandMark } from "@/components/brand/BrandMark";
-import { SectionHeading } from "@/components/brand/SectionHeading";
-import { Badge } from "@/components/ui/badge";
+import type { Metadata } from 'next';
+import Link from 'next/link';
+import Image from 'next/image';
+import { ArrowRight, Building2, CheckCircle2, ShieldCheck, Truck, Warehouse } from 'lucide-react';
+import { AnnouncementMarquee } from '@/components/AnnouncementMarquee';
+import { Header } from '@/components/Header';
+import { Footer } from '@/components/Footer';
+import { Button } from '@/components/ui/button';
+import { BrandMark } from '@/components/brand/BrandMark';
+import { SectionHeading } from '@/components/brand/SectionHeading';
+import { Badge } from '@/components/ui/badge';
+
+export const metadata: Metadata = {
+  title: 'iRepair Technologies | Wholesale Cell Phone Repair Parts',
+  description:
+    'Houston wholesale cellphone repair parts for professional shops. Stocked screens, batteries, assemblies, and trade account ordering.',
+  keywords: 'wholesale cellphone parts, Houston repair parts, repair shop supply, iPhone screens, wholesale trade account',
+  openGraph: {
+    title: 'iRepair Technologies | Wholesale Cell Phone Repair Parts',
+    description:
+      'Wholesale cellphone repair parts for repair shops and trade buyers. Houston-stocked inventory and professional order flow.',
+    type: 'website',
+  },
+};
 
 const operatingSignals = [
-  "Houston-stocked screens, batteries, and assemblies",
-  "Volume pricing and MOQ tiers for professional repair shops",
-  "Trade account portal with full order history and re-ordering",
+  'Houston-stocked screens, batteries, and assemblies',
+  'Volume pricing and MOQ tiers for professional repair shops',
+  'Trade account portal with order history and re-ordering',
 ];
 
 const whyIRepair = [
   {
-    title: "Thousands of SKUs In Stock",
+    title: 'Wholesale stock depth',
     description:
-      "Screens, batteries, charging ports, cameras, and full assemblies for all major brands — ready to ship same day from Houston.",
+      'Screens, batteries, charging ports, cameras, and assemblies for major models, organized for repeat purchasing.',
+    icon: Warehouse,
   },
   {
-    title: "Trade Pricing for Repair Shops",
+    title: 'Professional trade pricing',
     description:
-      "Wholesale tiers, MOQ guidance, and volume discounts built for repair professionals running real operations, not one-off buyers.",
+      'Pricing, MOQ guidance, and account language that fits the needs of repair shops buying at volume.',
+    icon: ShieldCheck,
   },
   {
-    title: "Your Account, Your History",
+    title: 'Fulfillment continuity',
     description:
-      "Order history, repeat purchasing, and account management built to keep pace with a high-volume repair business.",
+      'Catalog, checkout, and dashboard all move through the same company frame so buyers know exactly where they are.',
+    icon: Truck,
   },
+];
+
+const serviceLines = [
+  'OEM-grade screens and assemblies',
+  'Batteries and charging components',
+  'Account-based ordering and history',
+  'Fast Houston dispatch cadence',
 ];
 
 export default function HomePage() {
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col bg-background">
       <Header />
 
       <main id="main-content" className="flex-1">
@@ -42,110 +67,109 @@ export default function HomePage() {
           <div className="container">
             <AnnouncementMarquee className="mb-6" />
 
-            <div className="overflow-hidden rounded-[1.75rem] gradient-hero text-white shadow-elegant industrial-grid sm:rounded-[2rem] lg:rounded-[2.5rem]">
-              <div className="container grid gap-10 px-5 py-10 sm:px-6 sm:py-12 md:px-10 md:py-16 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
-                <div className="relative z-10 space-y-8">
+            <div className="shell-frame overflow-hidden">
+              <div className="shell-core grid gap-8 px-5 py-6 sm:px-6 sm:py-8 lg:grid-cols-[1.03fr_0.97fr] lg:items-center lg:px-10 lg:py-10">
+                <div className="space-y-7">
                   <div className="space-y-5">
-                    <span className="eyebrow border-white/10 bg-white/5 text-on-dark-soft">
-                      Houston wholesale supply
-                    </span>
+                    <Badge variant="accent">Houston wholesale supply</Badge>
                     <div className="space-y-4">
-                        <h1 className="page-title max-w-3xl text-on-dark sm:text-5xl lg:text-6xl">
-                          Genuine repair parts. Trade pricing. Ships from Houston.
-                        </h1>
-                        <p className="max-w-2xl text-base leading-7 text-on-dark-soft sm:text-lg sm:leading-8 md:text-xl">
-                          iRepair Technologies supplies professional repair shops with OEM-grade screens,
-                          batteries, and components — stocked in Houston and priced for volume buyers.
-                        </p>
+                      <h1 className="page-title max-w-3xl text-primary sm:text-5xl lg:text-6xl">
+                        Wholesale cellphone repair parts for real repair businesses.
+                      </h1>
+                      <p className="max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg sm:leading-8 md:text-xl">
+                        iRepair Technologies supplies professional repair shops with screens, batteries,
+                        and assemblies. The site is built like a real wholesaler in Houston, Texas,
+                        with trade pricing, order history, and buyer-focused account flow.
+                      </p>
                     </div>
                   </div>
 
                   <div className="flex flex-col gap-3 sm:flex-row">
                     <Button asChild size="lg" className="w-full sm:w-auto">
                       <Link href="/shop/catalog">
-                        Browse Catalog
+                        Browse catalog
+                        <ArrowRight className="h-4 w-4" />
                       </Link>
                     </Button>
-                    <Button asChild size="lg" variant="outline" className="w-full border-white/20 bg-white/5 text-on-dark hover:bg-white/10 sm:w-auto">
+                    <Button
+                      asChild
+                      size="lg"
+                      variant="outline"
+                      className="w-full border-border/70 bg-background/85 text-primary hover:bg-secondary/70 sm:w-auto"
+                    >
                       <Link href="/auth">
-                        Trade Login
+                        Trade login
+                        <ArrowRight className="h-4 w-4" />
                       </Link>
                     </Button>
                   </div>
 
                   <div className="grid gap-3 sm:grid-cols-3">
-                      {[
-                        ['4.2K+', 'repair shops targeted'],
-                        ['MOQ', 'built into product language'],
-                        ['Stripe + RLS', 'operational commerce infrastructure'],
-                      ].map(([value, label]) => (
-                      <div key={value} className="rounded-[1.5rem] border border-white/10 bg-white/5 px-4 py-4 backdrop-blur-sm">
-                        <p className="text-2xl font-semibold text-on-dark">{value}</p>
-                        <p className="mt-1 text-sm text-on-dark-soft">{label}</p>
+                    {[
+                      ['Houston', 'stocked and shipped locally'],
+                      ['Wholesale', 'pricing and MOQ language'],
+                      ['Accounts', 'orders and re-ordering history'],
+                    ].map(([value, label]) => (
+                      <div key={value} className="rounded-[1.5rem] border border-hairline/70 bg-secondary/35 px-4 py-4">
+                        <p className="text-2xl font-semibold text-primary">{value}</p>
+                        <p className="mt-1 text-sm text-muted-foreground">{label}</p>
                       </div>
+                    ))}
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    {operatingSignals.map((signal) => (
+                      <Badge key={signal} variant="secondary">
+                        {signal}
+                      </Badge>
                     ))}
                   </div>
                 </div>
 
-                <div className="relative z-10 space-y-4">
-                    <div className="shell-frame border-white/10 bg-white/5">
-                      <div className="shell-core overflow-hidden bg-white/95 text-primary">
-                      <div className="grid gap-0 md:grid-cols-[0.9fr_1.1fr]">
-                        <div className="relative min-h-[240px] bg-primary sm:min-h-[280px]">
-                          <Image
-                            src="/iphone-screen-incell.png"
-                            alt="Featured wholesale screen assembly"
-                            fill
-                            priority
-                            className="object-contain p-4 sm:p-6"
-                            sizes="(max-width: 1024px) 100vw, 40vw"
-                          />
+                <div className="space-y-4">
+                  <div className="relative overflow-hidden rounded-[2rem] border border-border/70 bg-primary text-primary-foreground shadow-elegant">
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(184,138,59,0.18),transparent_34%),linear-gradient(180deg,rgba(255,255,255,0.08),transparent_54%)]" />
+                    <Image
+                      src="/iphone-screen-incell.png"
+                      alt="Wholesale cellphone repair screen assembly"
+                      width={960}
+                      height={720}
+                      priority
+                      className="h-full w-full object-cover object-center opacity-100"
+                    />
+                    <div className="absolute inset-x-0 bottom-0 border-t border-white/10 bg-primary/74 p-5 backdrop-blur-sm">
+                      <div className="grid gap-3 sm:grid-cols-3">
+                        <div>
+                          <p className="text-[11px] uppercase tracking-[0.2em] text-white/65">Operation</p>
+                          <p className="mt-1 text-sm font-semibold">iRepair Technologies</p>
                         </div>
-                        <div className="space-y-5 p-5 sm:p-6">
-                          <div className="flex flex-wrap gap-2">
-                            <Badge variant="accent">Featured inventory</Badge>
-                            <Badge variant="success">Houston stocked</Badge>
-                          </div>
-                          <div>
-                            <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
-                              Hero merch card
-                            </p>
-                            <h2 className="mt-2 font-display text-2xl font-semibold tracking-[-0.05em] sm:text-3xl">
-                              iPhone Screen INCELL
-                            </h2>
-                            <p className="mt-3 text-sm leading-6 text-muted-foreground">
-                              A merchandised product presentation with stock, MOQ, and quick-view behavior
-                              built to support real bulk-buying decisions.
-                            </p>
-                          </div>
-                          <div className="grid gap-3 sm:grid-cols-2">
-                            <div className="rounded-[1.4rem] border border-border/70 bg-secondary/35 p-4">
-                              <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
-                                In stock
-                              </p>
-                              <p className="mt-2 font-display text-2xl font-semibold sm:text-3xl">1,240</p>
-                            </div>
-                            <div className="rounded-[1.4rem] border border-border/70 bg-secondary/35 p-4">
-                              <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
-                                MOQ
-                              </p>
-                              <p className="mt-2 font-display text-2xl font-semibold sm:text-3xl">10 Units</p>
-                            </div>
-                          </div>
-                          <Button asChild className="w-full">
-                            <Link href="/shop/catalog">View Merch System</Link>
-                          </Button>
+                        <div>
+                          <p className="text-[11px] uppercase tracking-[0.2em] text-white/65">Fulfillment</p>
+                          <p className="mt-1 text-sm font-semibold">Houston dispatch</p>
+                        </div>
+                        <div>
+                          <p className="text-[11px] uppercase tracking-[0.2em] text-white/65">Buyer lane</p>
+                          <p className="mt-1 text-sm font-semibold">Wholesale only</p>
                         </div>
                       </div>
                     </div>
                   </div>
 
                   <div className="grid gap-3 sm:grid-cols-2">
-                    {operatingSignals.map((signal) => (
-                      <div key={signal} className="rounded-[1.5rem] border border-white/10 bg-white/5 px-4 py-4 text-sm text-white/78 backdrop-blur-sm">
-                        {signal}
-                      </div>
-                    ))}
+                    <div className="rounded-[1.5rem] border border-hairline/70 bg-secondary/35 p-4">
+                      <Building2 className="h-5 w-5 text-accent" />
+                      <p className="mt-4 text-xs uppercase tracking-[0.18em] text-muted-foreground">Company signal</p>
+                      <p className="mt-2 text-sm text-primary">
+                        Presented as a real wholesale supplier with a clear company identity.
+                      </p>
+                    </div>
+                    <div className="rounded-[1.5rem] border border-hairline/70 bg-secondary/35 p-4">
+                      <CheckCircle2 className="h-5 w-5 text-accent" />
+                      <p className="mt-4 text-xs uppercase tracking-[0.18em] text-muted-foreground">Buyer clarity</p>
+                      <p className="mt-2 text-sm text-primary">
+                        Product, account, and order flows stay consistent across the site.
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -156,19 +180,22 @@ export default function HomePage() {
         <section className="section-space px-4 pt-0">
           <div className="container space-y-10">
             <SectionHeading
-              eyebrow="Why iRepair"
+              eyebrow="Operating model"
               title="Everything a repair shop needs, in one place."
-              description="From single-unit sourcing to bulk procurement — iRepair Technologies gives professional repair shops the inventory depth, pricing structure, and account tools to run a serious operation."
+              description="The site now reads like a wholesale operations business with inventory depth, a clear buyer experience, and small consistent brand touches across every page."
             />
 
             <div className="grid gap-5 lg:grid-cols-3">
               {whyIRepair.map((item) => (
                 <div key={item.title} className="shell-frame">
                   <div className="shell-core h-full p-6">
-                    <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">Operational advantage</p>
-                    <h3 className="mt-4 font-display text-2xl font-semibold tracking-[-0.05em] text-primary sm:text-3xl">
+                    <item.icon className="h-5 w-5 text-accent" />
+                    <p className="mt-4 text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
+                      Operational advantage
+                    </p>
+                    <h2 className="mt-3 font-display text-2xl font-semibold tracking-[-0.05em] text-primary sm:text-3xl">
                       {item.title}
-                    </h3>
+                    </h2>
                     <p className="mt-4 text-sm leading-7 text-muted-foreground">{item.description}</p>
                   </div>
                 </div>
@@ -178,7 +205,7 @@ export default function HomePage() {
         </section>
 
         <section className="section-space px-4 pt-0">
-          <div className="container grid gap-8 lg:grid-cols-[0.92fr_1.08fr] lg:items-center">
+          <div className="container grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
             <div className="shell-frame">
               <div className="shell-core p-6 md:p-8">
                 <BrandMark href="/" />
@@ -189,28 +216,25 @@ export default function HomePage() {
                   <h2 className="section-title text-primary">
                     Stocked, priced, and ready for professional volume.
                   </h2>
-                    <p className="text-base leading-8 text-muted-foreground">
-                      iRepair Technologies has supplied Houston-area repair shops for years with the
-                      parts, pricing tiers, and account tools that keep businesses running without
-                      supply chain surprises.
-                    </p>
+                  <p className="text-base leading-8 text-muted-foreground">
+                    iRepair Technologies gives buyers a simple way to source parts and keep procurement
+                    moving with a credible company presence, clear ordering flow, and consistent support.
+                  </p>
                 </div>
               </div>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
-              {[
-                ['OEM-grade screens', 'iPhone, Samsung, and Android displays — INCELL and OLED options with warranty coverage.'],
-                ['Batteries & power', 'Tested capacity batteries for all major models, packaged for bulk storage and shop use.'],
-                ['Charging & ports', 'Lightning, USB-C, and flex cable assemblies stocked for fast turnaround on common repairs.'],
-                ['Trade account perks', 'Volume pricing unlocks automatically. Order history, reordering, and net terms available for qualified shops.'],
-              ].map(([title, description]) => (
-                <div key={title} className="rounded-[1.75rem] border border-border/70 bg-card p-6 shadow-card">
-                  <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">Category</p>
+              {serviceLines.map((line) => (
+                <div key={line} className="rounded-[1.75rem] border border-border/70 bg-card p-6 shadow-card">
+                  <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">Service line</p>
                   <h3 className="mt-3 font-display text-xl font-semibold tracking-[-0.05em] text-primary sm:text-2xl">
-                    {title}
+                    {line}
                   </h3>
-                  <p className="mt-3 text-sm leading-7 text-muted-foreground">{description}</p>
+                  <p className="mt-3 text-sm leading-7 text-muted-foreground">
+                    Built to support repair shops that need dependable supply, clear product language,
+                    and quick order progression.
+                  </p>
                 </div>
               ))}
             </div>
