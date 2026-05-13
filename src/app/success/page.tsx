@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowRight, CheckCircle2, ClipboardList, ShieldCheck } from 'lucide-react';
 import { Footer } from '@/components/Footer';
@@ -8,6 +9,18 @@ import { formatCurrency } from '@/lib/formatters';
 import { stripe } from '@/lib/stripe/client';
 
 export const dynamic = 'force-dynamic';
+export const metadata: Metadata = {
+  title: 'Order Confirmed | iRepair Technologies',
+  description:
+    'Your wholesale repair parts order has been confirmed and is ready for fulfillment follow-up inside your iRepair Technologies dashboard.',
+  keywords: 'order confirmation, wholesale order, Stripe success, repair parts',
+  openGraph: {
+    title: 'Order Confirmed | iRepair Technologies',
+    description:
+      'A confirmation page for wholesale repair part orders and trade account follow-through.',
+    type: 'website',
+  },
+};
 
 type SuccessPageProps = {
   searchParams?: {

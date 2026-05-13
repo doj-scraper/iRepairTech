@@ -1,6 +1,8 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { ArrowUpRight, Boxes, ClipboardList, ReceiptText, ShieldCheck } from 'lucide-react';
+import Image from 'next/image';
+import { ArrowUpRight, Boxes, ClipboardList, Clock3, ReceiptText, ShieldCheck, Truck } from 'lucide-react';
 import { Footer } from '@/components/Footer';
 import { Header } from '@/components/Header';
 import { SectionHeading } from '@/components/brand/SectionHeading';
@@ -14,6 +16,18 @@ import { formatCurrency, formatDate, formatDateTime } from '@/lib/formatters';
 import { createClient } from '@/lib/supabase/server';
 
 export const dynamic = 'force-dynamic';
+export const metadata: Metadata = {
+  title: 'Dashboard | iRepair Technologies',
+  description:
+    'Review account history, active orders, and trade status inside the iRepair Technologies buyer dashboard.',
+  keywords: 'customer dashboard, wholesale orders, repair parts account, Houston trade account',
+  openGraph: {
+    title: 'Dashboard | iRepair Technologies',
+    description:
+      'A buyer dashboard for wholesale repair parts, order history, and trade account continuity.',
+    type: 'website',
+  },
+};
 
 export default async function DashboardPage() {
   const supabase = createClient();
@@ -53,19 +67,20 @@ export default async function DashboardPage() {
       <main id="main-content" className="px-4 py-8 md:px-6 md:py-12">
         <div className="container space-y-8">
           <section className="shell-frame overflow-hidden">
-            <div className="shell-core grid gap-8 px-5 py-6 sm:px-6 sm:py-8 md:grid-cols-[1.15fr_0.85fr] md:px-10 md:py-12">
+            <div className="shell-core grid gap-8 px-5 py-6 sm:px-6 sm:py-8 lg:grid-cols-[1.06fr_0.94fr] lg:items-center lg:px-10 lg:py-10">
               <div className="space-y-6">
                 <Badge variant="accent">Customer history</Badge>
                 <SectionHeading
                   eyebrow="Account dashboard"
                   title="Track purchasing history, active orders, and account standing from one branded surface."
-                  description="The dashboard now feels like part of a credible trade operation instead of a placeholder account page."
+                  description="The dashboard reads like a real customer portal, giving trade buyers quick visibility into spend, open orders, and account continuity."
                 />
-                <div className="grid gap-3 sm:grid-cols-3">
+                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                   {[
                     { icon: ClipboardList, label: 'Orders placed', value: String(customerOrders.length) },
                     { icon: ReceiptText, label: 'Lifetime spend', value: formatCurrency(totalSpend) },
                     { icon: Boxes, label: 'Open orders', value: String(activeOrders) },
+                    { icon: Clock3, label: 'Member since', value: formatDate(customerProfile.created_at) },
                   ].map((item) => (
                     <div key={item.label} className="rounded-[1.5rem] border border-hairline/70 bg-secondary/35 p-4">
                       <item.icon className="h-5 w-5 text-accent" />
@@ -76,29 +91,46 @@ export default async function DashboardPage() {
                 </div>
               </div>
 
-              <div className="rounded-[1.5rem] border border-hairline/80 bg-gradient-to-br from-primary/95 via-primary to-accent/70 p-5 text-primary-foreground shadow-glow sm:rounded-[2rem] sm:p-6">
-                <p className="text-xs uppercase tracking-[0.22em] text-primary-foreground/70">Buyer profile</p>
-                <p className="mt-3 break-words font-display text-2xl sm:text-3xl">{customerProfile.email}</p>
-                <div className="mt-8 space-y-4">
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.18em] text-primary-foreground/60">Member since</p>
-                    <p className="mt-1 text-sm">{formatDate(customerProfile.created_at)}</p>
+              <div className="space-y-4">
+                <div className="relative overflow-hidden rounded-[2rem] border border-border/70 bg-primary text-primary-foreground shadow-elegant">
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(184,138,59,0.22),transparent_32%),linear-gradient(180deg,rgba(255,255,255,0.1),transparent_48%)]" />
+                  <Image
+                    src="/iphone-screen-incell.png"
+                    alt="Wholesale customer dashboard visual"
+                    width={960}
+                    height={720}
+                    className="h-full w-full object-cover object-center opacity-100"
+                  />
+                  <div className="absolute inset-x-0 bottom-0 border-t border-white/10 bg-primary/72 p-5 backdrop-blur-sm">
+                    <div className="grid gap-3 sm:grid-cols-3">
+                      <div>
+                        <p className="text-[11px] uppercase tracking-[0.2em] text-white/65">Buyer profile</p>
+                        <p className="mt-1 break-words text-sm font-semibold">{customerProfile.email}</p>
+                      </div>
+                      <div>
+                        <p className="text-[11px] uppercase tracking-[0.2em] text-white/65">Role</p>
+                        <p className="mt-1 text-sm font-semibold capitalize">{customerProfile.role}</p>
+                      </div>
+                      <div>
+                        <p className="text-[11px] uppercase tracking-[0.2em] text-white/65">Terms</p>
+                        <p className="mt-1 text-sm font-semibold">
+                          {latestTermsAcceptance ? 'Accepted' : 'Captured on checkout'}
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.18em] text-primary-foreground/60">Account type</p>
-                    <p className="mt-1 text-sm capitalize">{customerProfile.role}</p>
+                </div>
+
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-[1.5rem] border border-hairline/70 bg-secondary/35 p-4">
+                    <Truck className="h-5 w-5 text-accent" />
+                    <p className="mt-4 text-xs uppercase tracking-[0.18em] text-muted-foreground">Fulfillment state</p>
+                    <p className="mt-2 text-sm text-primary">Order history stays aligned with the operational workflow that follows payment.</p>
                   </div>
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.18em] text-primary-foreground/60">Latest terms acceptance</p>
-                    <p className="mt-1 text-sm">
-                      {latestTermsAcceptance ? formatDateTime(latestTermsAcceptance) : 'Captured on next checkout'}
-                    </p>
-                  </div>
-                  <div className="flex items-start gap-3 rounded-[1.4rem] border border-white/10 bg-white/5 px-4 py-4">
-                    <ShieldCheck className="mt-0.5 h-5 w-5 text-primary-foreground/80" />
-                    <p className="text-sm text-primary-foreground/80">
-                      Your account history, order tracking, and purchasing records are securely linked to your trade login.
-                    </p>
+                  <div className="rounded-[1.5rem] border border-hairline/70 bg-secondary/35 p-4">
+                    <ShieldCheck className="h-5 w-5 text-accent" />
+                    <p className="mt-4 text-xs uppercase tracking-[0.18em] text-muted-foreground">Account continuity</p>
+                    <p className="mt-2 text-sm text-primary">Purchasing records, role data, and dashboard access stay linked to the buyer profile.</p>
                   </div>
                 </div>
               </div>

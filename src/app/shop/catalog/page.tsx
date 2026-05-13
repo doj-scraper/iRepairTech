@@ -1,6 +1,20 @@
+import type { Metadata } from 'next';
 import { createClient } from '@/lib/supabase/server';
 import { mapInventoryPart } from '@/lib/semantic/mapToUI';
 import { CatalogClient } from './CatalogClient';
+
+export const metadata: Metadata = {
+  title: 'Catalog | iRepair Technologies',
+  description:
+    'Browse wholesale cellphone repair parts and service workflows stocked for Houston-area repair shops and trade accounts.',
+  keywords: 'wholesale catalog, repair parts, cellphone parts, Houston wholesale, trade accounts',
+  openGraph: {
+    title: 'Catalog | iRepair Technologies',
+    description:
+      'Wholesale parts catalog for repair shops looking for Houston-stocked inventory and service workflows.',
+    type: 'website',
+  },
+};
 
 export default async function CatalogPage() {
   const supabase = createClient();
